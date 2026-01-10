@@ -483,15 +483,17 @@
 }
 
 .sidebar.stickers-sidebar {
-  right: 0;
+  right: 20px;
 }
 
 .sidebar.photo-sidebar {
-  right: 80px;
+  right: 20px;
+  top: calc(50% - 80px);
 }
 
 .sidebar.draw-sidebar {
-  right: 160px;
+  right: 20px;
+  top: calc(50% + 80px);
 }
 
 .sidebar-toggle {
@@ -528,7 +530,7 @@
 .draw-toggle-buttons {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem;
   position: absolute;
   right: 0;
   top: 50%;
@@ -539,12 +541,14 @@
   position: relative !important;
   transform: none !important;
   top: auto !important;
+  right: auto !important;
 }
 
 .text-toggle {
   position: relative !important;
   transform: none !important;
   top: auto !important;
+  right: auto !important;
 }
 
 .sidebar-content {

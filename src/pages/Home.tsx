@@ -338,9 +338,9 @@ export default function Home() {
             <button 
               className="sidebar-toggle draw-toggle"
               onClick={() => setDrawSidebarOpen(!drawSidebarOpen)}
-              title="Draw"
+              title="Write"
             >
-              <img src="/draw.png" alt="Draw" className="sidebar-toggle-img" />
+              <img src="/write.png" alt="Write" className="sidebar-toggle-img" />
             </button>
             <button 
               className="sidebar-toggle text-toggle"
