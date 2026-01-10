@@ -35,7 +35,6 @@ export default function Home() {
   const [selectedReceipt, setSelectedReceipt] = useState<CollageItem | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [stickerSidebarOpen, setStickerSidebarOpen] = useState(false);
-  const [stickerTab, setStickerTab] = useState<'stickers' | 'photos'>('stickers');
   const [photoSidebarOpen, setPhotoSidebarOpen] = useState(false);
   const [drawSidebarOpen, setDrawSidebarOpen] = useState(false);
 
@@ -159,7 +158,7 @@ export default function Home() {
               disabled={isAnalyzing}
               title="Upload Receipt"
             >
-              <img src="/receipt.png" alt="Upload Receipt" className="upload-icon-img" />
+              <img src="/button.png" alt="Upload Receipt" className="upload-icon-img" />
             </button>
             <h3>Upload Receipt ({receiptCount})</h3>
             <p>AI will analyze your receipt automatically</p>
@@ -254,115 +253,102 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Stickers/Photos Sidebar */}
+        {/* Stickers Sidebar */}
         <div className={`sidebar stickers-sidebar ${stickerSidebarOpen ? 'open' : ''}`}>
           <button 
             className="sidebar-toggle"
             onClick={() => setStickerSidebarOpen(!stickerSidebarOpen)}
-            title="Stickers & Photos"
+            title="Stickers"
           >
             <img src="/stickers.png" alt="Stickers" className="sidebar-toggle-img" />
           </button>
           
           {stickerSidebarOpen && (
             <div className="sidebar-content">
-              <div className="sidebar-tabs">
-                <button 
-                  className={`tab-btn ${stickerTab === 'stickers' ? 'active' : ''}`}
-                  onClick={() => setStickerTab('stickers')}
-                >
-                  Stickers
-                </button>
-                <button 
-                  className={`tab-btn ${stickerTab === 'photos' ? 'active' : ''}`}
-                  onClick={() => setStickerTab('photos')}
-                >
-                  Photos
-                </button>
+              <div className="sidebar-section">
+                <div className="stickers-grid">
+                  {STICKER_FILES.map((file) => (
+                    <button 
+                      key={file} 
+                      className="sticker-btn"
+                      onClick={() => {
+                        addSticker(file);
+                        setStickerSidebarOpen(false);
+                      }}
+                      title={`Add ${file}`}
+                    >
+                      <img src={`/stickers/${file}`} alt={file} />
+                    </button>
+                  ))}
+                </div>
               </div>
+            </div>
+          )}
+        </div>
 
-              {stickerTab === 'stickers' && (
-                <div className="sidebar-section">
-                  <div className="stickers-grid">
-                    {STICKER_FILES.map((file) => (
-                      <button 
-                        key={file} 
-                        className="sticker-btn"
-                        onClick={() => {
-                          addSticker(file);
-                          setStickerSidebarOpen(false);
-                        }}
-                        title={`Add ${file}`}
-                      >
-                        <img src={`/stickers/${file}`} alt={file} />
-                      </button>
+        {/* Photos Sidebar */}
+        <div className={`sidebar photo-sidebar ${photoSidebarOpen ? 'open' : ''}`}>
+          <button 
+            className="sidebar-toggle"
+            onClick={() => setPhotoSidebarOpen(!photoSidebarOpen)}
+            title="Photos"
+          >
+            <img src="/photo.png" alt="Photos" className="sidebar-toggle-img" />
+          </button>
+          
+          {photoSidebarOpen && (
+            <div className="sidebar-content">
+              <div className="sidebar-section">
+                {items.filter(i => i.type === 'image' && i.id.startsWith('photo-')).length === 0 ? (
+                  <div className="empty-message">No photos uploaded yet</div>
+                ) : (
+                  <div className="photos-grid">
+                    {items.filter(i => i.type === 'image' && i.id.startsWith('photo-')).map((item) => (
+                      <div key={item.id} className="photo-thumbnail">
+                        <img src={item.content} alt="Uploaded" />
+                        <button 
+                          className="add-photo-btn"
+                          onClick={() => {
+                            addCollageItem({
+                              id: `photo-copy-${Date.now()}`,
+                              type: 'image',
+                              x: 150 + Math.random() * 200,
+                              y: 120 + Math.random() * 150,
+                              rotation: Math.random() * 10 - 5,
+                              scale: 0.8,
+                              content: item.content
+                            });
+                          }}
+                          title="Add to canvas"
+                        >
+                          +
+                        </button>
+                      </div>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {stickerTab === 'photos' && (
-                <div className="sidebar-section">
-                  {items.filter(i => i.type === 'image' && i.id.startsWith('photo-')).length === 0 ? (
-                    <div className="empty-message">No photos uploaded yet</div>
-                  ) : (
-                    <div className="photos-grid">
-                      {items.filter(i => i.type === 'image' && i.id.startsWith('photo-')).map((item) => (
-                        <div key={item.id} className="photo-thumbnail">
-                          <img src={item.content} alt="Uploaded" />
-                          <button 
-                            className="add-photo-btn"
-                            onClick={() => {
-                              addCollageItem({
-                                id: `photo-copy-${Date.now()}`,
-                                type: 'image',
-                                x: 150 + Math.random() * 200,
-                                y: 120 + Math.random() * 150,
-                                rotation: Math.random() * 10 - 5,
-                                scale: 0.8,
-                                content: item.content
-                              });
-                            }}
-                            title="Add to canvas"
-                          >
-                            +
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
         </div>
 
         {/* Draw/Text Sidebar */}
         <div className={`sidebar draw-sidebar ${drawSidebarOpen ? 'open' : ''}`}>
-          <button 
-            className="sidebar-toggle"
-            onClick={() => setDrawSidebarOpen(!drawSidebarOpen)}
-            title="Draw & Text"
-          >
-            <span className="draw-icon">✏️</span>
-          </button>
-          
-          {drawSidebarOpen && (
-            <div className="sidebar-content">
-              <div className="sidebar-section">
-                <div className="draw-tools">
-                  <button className="draw-tool-btn">
-                    <span>✏️</span>
-                    <span>Draw</span>
-                  </button>
-                  <button className="draw-tool-btn">
-                    <span>📝</span>
-                    <span>Text</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          <div className="draw-toggle-buttons">
+            <button 
+              className="sidebar-toggle draw-toggle"
+              onClick={() => setDrawSidebarOpen(!drawSidebarOpen)}
+              title="Draw"
+            >
+              <img src="/draw.png" alt="Draw" className="sidebar-toggle-img" />
+            </button>
+            <button 
+              className="sidebar-toggle text-toggle"
+              title="Text"
+            >
+              <img src="/text.png" alt="Text" className="sidebar-toggle-img" />
+            </button>
+          </div>
         </div>
       </div>
 

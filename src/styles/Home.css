@@ -487,11 +487,11 @@
 }
 
 .sidebar.photo-sidebar {
-  right: 70px;
+  right: 80px;
 }
 
 .sidebar.draw-sidebar {
-  right: 140px;
+  right: 160px;
 }
 
 .sidebar-toggle {
@@ -523,6 +523,28 @@
 
 .draw-icon {
   font-size: 1.8rem;
+}
+
+.draw-toggle-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.draw-toggle {
+  position: relative !important;
+  transform: none !important;
+  top: auto !important;
+}
+
+.text-toggle {
+  position: relative !important;
+  transform: none !important;
+  top: auto !important;
 }
 
 .sidebar-content {
