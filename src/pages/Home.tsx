@@ -165,7 +165,7 @@ export default function Home() {
 
           <div className="upload-card">
             <div className="upload-icon">🖼</div>
-            <h3>Add Photos ({imageCount})</h3>
+            <h3>Add Photos</h3>
             <p>Upload any photos to include in your memory collage</p>
             <button 
               className="choose-btn choose-btn-light"
