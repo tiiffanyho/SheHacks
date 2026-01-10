@@ -18,9 +18,9 @@ function App() {
       <header className="header">
         <div className="header-left">
           <div className="logo">
-            <span className="logo-icon">✦</span>
+            <img src="/logo.png" alt="ReceiptJars" className="logo-image" />
             <div>
-              <h1>Recollect</h1>
+              <h1>ReceiptJars</h1>
               <p>Turn everyday moments into lasting memories</p>
             </div>
           </div>
@@ -42,19 +42,19 @@ function App() {
           className={`nav-item ${currentPage === 'home' ? 'active' : ''}`}
           onClick={() => setCurrentPage('home')}
         >
-          <span className="nav-icon">📋</span> Upload
+          Upload
         </button>
         <button 
           className={`nav-item ${currentPage === 'scan' ? 'active' : ''}`}
           onClick={() => setCurrentPage('scan')}
         >
-          <span className="nav-icon">📊</span> Summary
+          Summary
         </button>
         <button 
           className={`nav-item ${currentPage === 'collage' ? 'active' : ''}`}
           onClick={() => setCurrentPage('collage')}
         >
-          <span className="nav-icon">🎨</span> Memory Collage
+          Memory Collage
         </button>
       </nav>
 

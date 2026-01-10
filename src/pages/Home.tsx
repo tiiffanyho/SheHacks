@@ -26,7 +26,7 @@ export default function Home({ setPage }: HomeProps) {
               className="choose-btn choose-btn-dark"
               onClick={() => receiptInputRef.current?.click()}
             >
-              <span>⬆</span> Choose Receipt
+              Choose Receipt
             </button>
             <input
               ref={receiptInputRef}
@@ -49,7 +49,7 @@ export default function Home({ setPage }: HomeProps) {
               className="choose-btn choose-btn-light"
               onClick={() => photoInputRef.current?.click()}
             >
-              <span>⬆</span> Choose Photo
+              Choose Photo
             </button>
             <input
               ref={photoInputRef}

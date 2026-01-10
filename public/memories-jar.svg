@@ -1,0 +1,62 @@
+<svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Jar lid -->
+  <rect x="185" y="130" width="290" height="50" rx="20" fill="#d4a574" stroke="#c9a87d" strokeWidth="3"/>
+  
+  <!-- Jar body -->
+  <path d="M 200 175 L 180 280 Q 160 380 300 480 Q 440 380 420 280 L 400 175 Z" fill="#e8f4f8" stroke="#7eb3d9" strokeWidth="8"/>
+  
+  <!-- Jar bottom curve -->
+  <ellipse cx="300" cy="480" rx="120" ry="40" fill="#a8d4ed" opacity="0.6"/>
+  
+  <!-- Glass shine -->
+  <ellipse cx="240" cy="250" rx="35" ry="80" fill="white" opacity="0.25"/>
+  
+  <!-- Pink heart/receipt 1 -->
+  <g transform="translate(280, 240)">
+    <path d="M -35 -10 Q -45 -20 -55 -15 Q -65 -5 -55 10 L 0 50 L 55 10 Q 65 -5 55 -15 Q 45 -20 35 -10 Q 25 0 0 25 Q -25 0 -35 -10 Z" fill="#f5bfd0" stroke="#e89ab5" strokeWidth="3"/>
+    <line x1="-25" y1="10" x2="25" y2="10" stroke="#e89ab5" strokeWidth="2" opacity="0.7"/>
+    <line x1="-25" y1="25" x2="25" y2="25" stroke="#e89ab5" strokeWidth="2" opacity="0.7"/>
+  </g>
+  
+  <!-- Pink receipt 2 -->
+  <g transform="translate(250, 310)">
+    <rect x="-32" y="-42" width="64" height="84" rx="4" fill="#f5bfd0" stroke="#e89ab5" strokeWidth="3"/>
+    <line x1="-18" y1="-25" x2="18" y2="-25" stroke="#e89ab5" strokeWidth="2" opacity="0.7"/>
+    <line x1="-18" y1="-12" x2="18" y2="-12" stroke="#e89ab5" strokeWidth="2" opacity="0.7"/>
+    <line x1="-18" y1="1" x2="18" y2="1" stroke="#e89ab5" strokeWidth="2" opacity="0.7"/>
+  </g>
+  
+  <!-- Yellow receipt -->
+  <g transform="translate(330, 280)">
+    <rect x="-30" y="-40" width="60" height="80" rx="4" fill="#fef3a0" stroke="#f0d860" strokeWidth="3"/>
+    <line x1="-16" y1="-22" x2="16" y2="-22" stroke="#f0d860" strokeWidth="2" opacity="0.7"/>
+    <line x1="-16" y1="-10" x2="16" y2="-10" stroke="#f0d860" strokeWidth="2" opacity="0.7"/>
+    <line x1="-16" y1="2" x2="16" y2="2" stroke="#f0d860" strokeWidth="2" opacity="0.7"/>
+  </g>
+  
+  <!-- Blue receipt -->
+  <g transform="translate(280, 360)">
+    <rect x="-30" y="-40" width="60" height="80" rx="4" fill="#b3d9f0" stroke="#7eb3d9" strokeWidth="3"/>
+    <line x1="-16" y1="-22" x2="16" y2="-22" stroke="#7eb3d9" strokeWidth="2" opacity="0.7"/>
+    <line x1="-16" y1="-10" x2="16" y2="-10" stroke="#7eb3d9" strokeWidth="2" opacity="0.7"/>
+    <line x1="-16" y1="2" x2="16" y2="2" stroke="#7eb3d9" strokeWidth="2" opacity="0.7"/>
+  </g>
+  
+  <!-- Green receipt -->
+  <g transform="translate(360, 330)">
+    <rect x="-28" y="-38" width="56" height="76" rx="4" fill="#c3e5c3" stroke="#8fd48f" strokeWidth="3"/>
+    <line x1="-14" y1="-20" x2="14" y2="-20" stroke="#8fd48f" strokeWidth="2" opacity="0.7"/>
+    <line x1="-14" y1="-8" x2="14" y2="-8" stroke="#8fd48f" strokeWidth="2" opacity="0.7"/>
+  </g>
+  
+  <!-- Purple receipt -->
+  <g transform="translate(330, 380)">
+    <rect x="-28" y="-38" width="56" height="76" rx="4" fill="#e5c3f5" stroke="#d4a5e8" strokeWidth="3"/>
+    <line x1="-14" y1="-20" x2="14" y2="-20" stroke="#d4a5e8" strokeWidth="2" opacity="0.7"/>
+    <line x1="-14" y1="-8" x2="14" y2="-8" stroke="#d4a5e8" strokeWidth="2" opacity="0.7"/>
+  </g>
+  
+  <!-- Label -->
+  <rect x="230" y="420" width="140" height="50" rx="8" fill="white" stroke="#7eb3d9" strokeWidth="3"/>
+  <text x="300" y="455" fontSize="32" fontWeight="600" fill="#7eb3d9" textAnchor="middle" fontFamily="system-ui, -apple-system, sans-serif">Memories</text>
+</svg>

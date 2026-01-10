@@ -1,0 +1,47 @@
+.jar-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jar-container.small {
+  width: 70px;
+  height: 95px;
+}
+
+.jar-container.large {
+  width: 220px;
+  height: 290px;
+}
+
+.jar-image {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 4px 12px rgba(126, 179, 217, 0.15));
+}
+
+.jar-container.loading .jar-image {
+  animation: jarBounce 2s ease-in-out infinite;
+}
+
+@keyframes jarBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.jar-container.loading {
+  animation: jarGlow 2s ease-in-out infinite;
+}
+
+@keyframes jarGlow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
