@@ -1,12 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Home from './pages/Home';
-import { useStore } from './store';
 import './App.css';
 
 function App() {
-  const memories = useStore((state) => state.memories);
-  const total = memories.reduce((sum, m) => sum + m.receiptData.total, 0);
-
   return (
     <div className="app">
       <header className="header">
@@ -17,16 +13,6 @@ function App() {
               <h1>ReceiptJars</h1>
               <p>Turn everyday moments into lasting memories</p>
             </div>
-          </div>
-        </div>
-        <div className="header-stats">
-          <div className="stat">
-            <span className="stat-label">Receipts</span>
-            <span className="stat-value">{memories.length}</span>
-          </div>
-          <div className="stat">
-            <span className="stat-label">Total Spent</span>
-            <span className="stat-value">${total.toFixed(2)}</span>
           </div>
         </div>
       </header>
