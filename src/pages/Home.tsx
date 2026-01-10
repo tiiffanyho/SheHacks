@@ -30,6 +30,8 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<'stickers' | 'photos'>('stickers');
+  const [photoSidebarOpen, setPhotoSidebarOpen] = useState(false);
+  const [drawSidebarOpen, setDrawSidebarOpen] = useState(false);
 
   // Count images and receipts
   const imageCount = items.filter(i => i.type === 'image' && !i.id.startsWith('receipt-')).length;
@@ -249,7 +251,7 @@ export default function Home() {
           className="sidebar-toggle"
           onClick={() => setSidebarOpen(!sidebarOpen)}
         >
-          <span className="toggle-arrow">{">"}</span>
+          <img src="/stickers.png" alt="Stickers" className="sidebar-toggle-icon" />
         </button>
         
         {sidebarOpen && (
@@ -271,7 +273,6 @@ export default function Home() {
 
             {sidebarTab === 'stickers' && (
               <div className="sidebar-section">
-                <img src="/stickers.png" alt="Stickers" className="sidebar-icon" />
                 <div className="stickers-grid">
                   {STICKERS.map((emoji) => (
                     <button 
@@ -318,6 +319,80 @@ export default function Home() {
                 )}
               </div>
             )}
+          </div>
+        )}
+      </div>
+
+      {/* Photo Sidebar */}
+      <div className={`sidebar photo-sidebar ${photoSidebarOpen ? 'open' : ''}`}>
+        <button 
+          className="sidebar-toggle photo-toggle"
+          onClick={() => setPhotoSidebarOpen(!photoSidebarOpen)}
+        >
+          <img src="/photo.png" alt="Photos" className="sidebar-toggle-icon" />
+        </button>
+        
+        {photoSidebarOpen && (
+          <div className="sidebar-content">
+            <div className="sidebar-section">
+              <h4>Uploaded Photos</h4>
+              {items.filter(i => i.type === 'image' && i.id.startsWith('photo-')).length === 0 ? (
+                <p className="empty-message">No photos uploaded yet. Upload photos from the section above!</p>
+              ) : (
+                <div className="photos-grid">
+                  {items.filter(i => i.type === 'image' && i.id.startsWith('photo-')).map((item) => (
+                    <div key={item.id} className="photo-thumbnail">
+                      <img src={item.content} alt="Uploaded" />
+                      <button 
+                        className="add-photo-btn"
+                        onClick={() => {
+                          addCollageItem({
+                            id: `photo-copy-${Date.now()}`,
+                            type: 'image',
+                            x: 150 + Math.random() * 200,
+                            y: 120 + Math.random() * 150,
+                            rotation: Math.random() * 10 - 5,
+                            scale: 0.8,
+                            content: item.content
+                          });
+                        }}
+                      >
+                        +
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Draw & Text Sidebar */}
+      <div className={`sidebar draw-sidebar ${drawSidebarOpen ? 'open' : ''}`}>
+        <button 
+          className="sidebar-toggle draw-toggle"
+          onClick={() => setDrawSidebarOpen(!drawSidebarOpen)}
+        >
+          <span className="draw-icon">✏️</span>
+        </button>
+        
+        {drawSidebarOpen && (
+          <div className="sidebar-content">
+            <div className="sidebar-section">
+              <h4>Draw & Text</h4>
+              <p className="sidebar-label">Add drawings and text to your collage</p>
+              <div className="draw-tools">
+                <button className="draw-tool-btn">
+                  <span>✏️</span>
+                  <span>Draw</span>
+                </button>
+                <button className="draw-tool-btn">
+                  <span>📝</span>
+                  <span>Text</span>
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
