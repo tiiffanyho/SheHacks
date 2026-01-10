@@ -487,17 +487,17 @@
 
 .sidebar.stickers-sidebar {
   right: 20px;
-  top: calc(50% - 140px);
+  top: calc(50% - 130px);
 }
 
 .sidebar.photo-sidebar {
   right: 20px;
-  top: calc(50% - 70px);
+  top: calc(50% - 40px);
 }
 
 .sidebar.draw-sidebar {
   right: 20px;
-  top: calc(50% + 70px);
+  top: calc(50% + 50px);
 }
 
 .sidebar-toggle {
@@ -755,4 +755,86 @@
 
 .line-item {
   pointer-events: none;
+}
+
+/* Draw Options */
+.draw-options {
+  width: 250px;
+  background: white;
+  border: 2px solid #FEDBDD;
+  border-radius: 12px;
+  border-right: none;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  right: 60px;
+  top: calc(50% + 100px);
+  transform: translateY(-50%);
+}
+
+.draw-option-group {
+  margin-bottom: 1rem;
+}
+
+.draw-option-group label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.mode-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 0.5rem;
+  border: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.mode-btn:hover {
+  border-color: #FEDBDD;
+  color: #9b5a6b;
+}
+
+.mode-btn.active {
+  background: #FEDBDD;
+  border-color: #FEDBDD;
+  color: #9b5a6b;
+}
+
+.color-picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.color-btn {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.color-btn:hover {
+  border-color: #999;
+  transform: scale(1.05);
+}
+
+.color-btn.active {
+  border-color: #333;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }

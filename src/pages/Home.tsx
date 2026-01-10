@@ -38,6 +38,8 @@ export default function Home() {
   const [photoSidebarOpen, setPhotoSidebarOpen] = useState(false);
   const [drawSidebarOpen, setDrawSidebarOpen] = useState(false);
   const [isDrawMode, setIsDrawMode] = useState(false);
+  const [isEraseMode, setIsEraseMode] = useState(false);
+  const [drawColor, setDrawColor] = useState('#000000');
   const [isTextMode, setIsTextMode] = useState(false);
   const canvasDrawRef = useRef<HTMLCanvasElement>(null);
   const isDrawingRef = useRef(false);
@@ -150,7 +152,7 @@ export default function Home() {
   };
 
   const startDrawing = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDrawMode || !canvasRef.current) return;
+    if ((!isDrawMode && !isEraseMode) || !canvasRef.current) return;
     
     const rect = canvasRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -162,21 +164,28 @@ export default function Home() {
   };
 
   const draw = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDrawMode || !isDrawingRef.current || !canvasRef.current) return;
+    if ((!isDrawMode && !isEraseMode) || !isDrawingRef.current || !canvasRef.current) return;
     
     const rect = canvasRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
+    // Create a single line segment from last point to current point
     const newItem: CollageItem = {
       id: `line-${Date.now()}-${Math.random()}`,
       type: 'line',
-      x: lastXRef.current,
-      y: lastYRef.current,
+      x: Math.min(lastXRef.current, x),
+      y: Math.min(lastYRef.current, y),
       rotation: 0,
       scale: 1,
-      content: JSON.stringify({ x1: lastXRef.current, y1: lastYRef.current, x2: x, y2: y }),
-      color: '#000000'
+      content: JSON.stringify({ 
+        x1: 0, 
+        y1: 0, 
+        x2: x - lastXRef.current, 
+        y2: y - lastYRef.current 
+      }),
+      color: isEraseMode ? '#FFFFFF' : drawColor,
+      lineWidth: isEraseMode ? 20 : 3
     };
     addCollageItem(newItem);
     
@@ -287,14 +296,14 @@ export default function Home() {
           <div 
             ref={canvasRef} 
             className="canvas"
-            style={{ cursor: isDrawMode ? 'crosshair' : 'default' }}
+            style={{ cursor: isDrawMode || isEraseMode ? 'crosshair' : 'default' }}
             onMouseDown={startDrawing}
             onMouseMove={draw}
             onMouseUp={stopDrawing}
             onMouseLeave={stopDrawing}
             onClick={(e) => {
               // Deselect when clicking on canvas background (not on items)
-              if (e.target === e.currentTarget && !isDrawMode && !isTextMode) {
+              if (e.target === e.currentTarget && !isDrawMode && !isEraseMode && !isTextMode) {
                 setSelectedItem(null);
               }
             }}
@@ -401,13 +410,18 @@ export default function Home() {
         </div>
 
         {/* Draw/Text Sidebar */}
-        <div className={`sidebar draw-sidebar ${drawSidebarOpen ? 'open' : ''}`}>
+        <div className={`sidebar draw-sidebar ${drawSidebarOpen || isDrawMode || isEraseMode ? 'open' : ''}`}>
           <div className="draw-toggle-buttons">
             <button 
-              className={`sidebar-toggle draw-toggle ${isDrawMode ? 'active' : ''}`}
+              className={`sidebar-toggle draw-toggle ${isDrawMode && !isEraseMode ? 'active' : ''}`}
               onClick={() => {
-                setIsDrawMode(!isDrawMode);
-                setIsTextMode(false);
+                if (isDrawMode && !isEraseMode) {
+                  setIsDrawMode(false);
+                } else {
+                  setIsDrawMode(true);
+                  setIsEraseMode(false);
+                  setIsTextMode(false);
+                }
               }}
               title="Write"
             >
@@ -427,6 +441,51 @@ export default function Home() {
               <img src="/text.png" alt="Text" className="sidebar-toggle-img" />
             </button>
           </div>
+
+          {(isDrawMode || isEraseMode) && (
+            <div className="draw-options">
+              <div className="draw-option-group">
+                <label>Mode</label>
+                <div className="mode-buttons">
+                  <button 
+                    className={`mode-btn ${isDrawMode && !isEraseMode ? 'active' : ''}`}
+                    onClick={() => {
+                      setIsDrawMode(true);
+                      setIsEraseMode(false);
+                    }}
+                  >
+                    Draw
+                  </button>
+                  <button 
+                    className={`mode-btn ${isEraseMode ? 'active' : ''}`}
+                    onClick={() => {
+                      setIsDrawMode(false);
+                      setIsEraseMode(true);
+                    }}
+                  >
+                    Erase
+                  </button>
+                </div>
+              </div>
+
+              {isDrawMode && !isEraseMode && (
+                <div className="draw-option-group">
+                  <label>Color</label>
+                  <div className="color-picker">
+                    {['#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF'].map((color) => (
+                      <button
+                        key={color}
+                        className={`color-btn ${drawColor === color ? 'active' : ''}`}
+                        style={{ backgroundColor: color }}
+                        onClick={() => setDrawColor(color)}
+                        title={color}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -652,11 +711,28 @@ function CollageItemComponent({ item, selected, onSelect, onUpdate, onDelete, on
           {item.content}
         </div>
       )}
-      {item.type === 'line' && (
-        <svg width="100" height="100" className="line-item" style={{ position: 'absolute' }}>
-          <line x1="10" y1="10" x2="90" y2="90" stroke={item.color || '#000000'} strokeWidth="2" />
-        </svg>
-      )}
+      {item.type === 'line' && (() => {
+        try {
+          const coords = JSON.parse(item.content);
+          const width = Math.abs(coords.x2) + 10;
+          const height = Math.abs(coords.y2) + 10;
+          return (
+            <svg width={width} height={height} className="line-item" style={{ position: 'absolute' }}>
+              <line 
+                x1={Math.min(0, coords.x2)} 
+                y1={Math.min(0, coords.y2)} 
+                x2={Math.max(0, coords.x2)} 
+                y2={Math.max(0, coords.y2)} 
+                stroke={item.color || '#000000'} 
+                strokeWidth={item.lineWidth || 3}
+                strokeLinecap="round"
+              />
+            </svg>
+          );
+        } catch {
+          return null;
+        }
+      })()}
       {item.type === 'smiley' && (
         <span className="smiley-content" style={{ color: item.color }}>{item.content}</span>
       )}
