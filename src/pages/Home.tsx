@@ -37,6 +37,12 @@ export default function Home() {
   const [stickerSidebarOpen, setStickerSidebarOpen] = useState(false);
   const [photoSidebarOpen, setPhotoSidebarOpen] = useState(false);
   const [drawSidebarOpen, setDrawSidebarOpen] = useState(false);
+  const [isDrawMode, setIsDrawMode] = useState(false);
+  const [isTextMode, setIsTextMode] = useState(false);
+  const canvasDrawRef = useRef<HTMLCanvasElement>(null);
+  const isDrawingRef = useRef(false);
+  const lastXRef = useRef(0);
+  const lastYRef = useRef(0);
 
   // Count images and receipts
   const imageCount = items.filter(i => i.type === 'image' && !i.id.startsWith('receipt-')).length;
@@ -123,6 +129,63 @@ export default function Home() {
       content: `/stickers/${stickerFile}`
     };
     addCollageItem(newItem);
+  };
+
+  const addTextToCanvas = () => {
+    const text = prompt('Enter your text:');
+    if (text && text.trim()) {
+      const newItem: CollageItem = {
+        id: `text-${Date.now()}`,
+        type: 'text',
+        x: 100 + Math.random() * 200,
+        y: 100 + Math.random() * 150,
+        rotation: 0,
+        scale: 1,
+        content: text,
+        color: '#000000'
+      };
+      addCollageItem(newItem);
+      setIsTextMode(false);
+    }
+  };
+
+  const startDrawing = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDrawMode || !canvasRef.current) return;
+    
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    isDrawingRef.current = true;
+    lastXRef.current = x;
+    lastYRef.current = y;
+  };
+
+  const draw = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDrawMode || !isDrawingRef.current || !canvasRef.current) return;
+    
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const newItem: CollageItem = {
+      id: `line-${Date.now()}-${Math.random()}`,
+      type: 'line',
+      x: lastXRef.current,
+      y: lastYRef.current,
+      rotation: 0,
+      scale: 1,
+      content: JSON.stringify({ x1: lastXRef.current, y1: lastYRef.current, x2: x, y2: y }),
+      color: '#000000'
+    };
+    addCollageItem(newItem);
+    
+    lastXRef.current = x;
+    lastYRef.current = y;
+  };
+
+  const stopDrawing = () => {
+    isDrawingRef.current = false;
   };
 
   const updateItem = (id: string, updates: Partial<CollageItem>) => {
@@ -224,9 +287,14 @@ export default function Home() {
           <div 
             ref={canvasRef} 
             className="canvas"
+            style={{ cursor: isDrawMode ? 'crosshair' : 'default' }}
+            onMouseDown={startDrawing}
+            onMouseMove={draw}
+            onMouseUp={stopDrawing}
+            onMouseLeave={stopDrawing}
             onClick={(e) => {
               // Deselect when clicking on canvas background (not on items)
-              if (e.target === e.currentTarget) {
+              if (e.target === e.currentTarget && !isDrawMode && !isTextMode) {
                 setSelectedItem(null);
               }
             }}
@@ -336,14 +404,24 @@ export default function Home() {
         <div className={`sidebar draw-sidebar ${drawSidebarOpen ? 'open' : ''}`}>
           <div className="draw-toggle-buttons">
             <button 
-              className="sidebar-toggle draw-toggle"
-              onClick={() => setDrawSidebarOpen(!drawSidebarOpen)}
+              className={`sidebar-toggle draw-toggle ${isDrawMode ? 'active' : ''}`}
+              onClick={() => {
+                setIsDrawMode(!isDrawMode);
+                setIsTextMode(false);
+              }}
               title="Write"
             >
               <img src="/write.png" alt="Write" className="sidebar-toggle-img" />
             </button>
             <button 
-              className="sidebar-toggle text-toggle"
+              className={`sidebar-toggle text-toggle ${isTextMode ? 'active' : ''}`}
+              onClick={() => {
+                if (!isTextMode) {
+                  addTextToCanvas();
+                } else {
+                  setIsTextMode(false);
+                }
+              }}
               title="Text"
             >
               <img src="/text.png" alt="Text" className="sidebar-toggle-img" />
@@ -569,6 +647,16 @@ function CollageItemComponent({ item, selected, onSelect, onUpdate, onDelete, on
         <span className="sticker-content">{item.content}</span>
       ) : null}
       {item.type === 'image' && <img src={item.content} alt="collage item" draggable={false} />}
+      {item.type === 'text' && (
+        <div className="text-item" style={{ color: item.color || '#000000', fontSize: '16px', fontWeight: 'bold' }}>
+          {item.content}
+        </div>
+      )}
+      {item.type === 'line' && (
+        <svg width="100" height="100" className="line-item" style={{ position: 'absolute' }}>
+          <line x1="10" y1="10" x2="90" y2="90" stroke={item.color || '#000000'} strokeWidth="2" />
+        </svg>
+      )}
       {item.type === 'smiley' && (
         <span className="smiley-content" style={{ color: item.color }}>{item.content}</span>
       )}

@@ -475,32 +475,33 @@
 /* Sidebars */
 .sidebar {
   position: fixed;
-  right: 0;
+  right: 20px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 40;
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .sidebar.stickers-sidebar {
   right: 20px;
+  top: calc(50% - 140px);
 }
 
 .sidebar.photo-sidebar {
   right: 20px;
-  top: calc(50% - 80px);
+  top: calc(50% - 70px);
 }
 
 .sidebar.draw-sidebar {
   right: 20px;
-  top: calc(50% + 80px);
+  top: calc(50% + 70px);
 }
 
 .sidebar-toggle {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  position: relative;
   width: 60px;
   height: 60px;
   background: none;
@@ -511,10 +512,16 @@
   justify-content: center;
   transition: transform 0.3s;
   padding: 0;
+  margin: 5px 0;
 }
 
 .sidebar-toggle:hover {
-  transform: translateY(-50%) scale(1.1);
+  transform: scale(1.1);
+}
+
+.sidebar-toggle.active {
+  background: rgba(254, 219, 221, 0.3);
+  border-radius: 8px;
 }
 
 .sidebar-toggle-img {
@@ -530,25 +537,18 @@
 .draw-toggle-buttons {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  gap: 0.5rem;
+  width: 100%;
 }
 
 .draw-toggle {
   position: relative !important;
   transform: none !important;
-  top: auto !important;
-  right: auto !important;
 }
 
 .text-toggle {
   position: relative !important;
   transform: none !important;
-  top: auto !important;
-  right: auto !important;
 }
 
 .sidebar-content {
@@ -741,4 +741,18 @@
   margin: 0;
   color: #666;
   font-size: 0.95rem;
+}
+
+/* Text and Draw Items */
+.text-item {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  white-space: normal;
+  word-break: break-word;
+  max-width: 300px;
+}
+
+.line-item {
+  pointer-events: none;
 }
