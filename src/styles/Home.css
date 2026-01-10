@@ -28,9 +28,12 @@
 
 .upload-cards-container {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
   margin-bottom: 2rem;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @media (max-width: 900px) {
@@ -48,7 +51,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.5rem;
   transition: all 0.3s;
 }
 
@@ -57,29 +60,33 @@
   background: #f5f5f5;
 }
 
-.upload-icon {
-  font-size: 2rem;
-  width: 60px;
-  height: 60px;
-  background: #e8e8e8;
-  border-radius: 50%;
+.upload-icon-btn {
+  width: 100px;
+  height: 100px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.2s;
+  border-radius: 8px;
 }
 
-.upload-icon-image {
-  width: 120px;
-  height: 120px;
-  object-fit: contain;
-  margin-bottom: 1rem;
+.upload-icon-btn:hover:not(:disabled) {
+  transform: scale(1.05);
 }
 
-.icon-image {
+.upload-icon-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.upload-icon-img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  padding: 8px;
 }
 
 .upload-card h3 {
@@ -237,10 +244,17 @@
 }
 
 /* Canvas Section */
+.canvas-wrapper {
+  display: flex;
+  gap: 2rem;
+  position: relative;
+  padding-top: 1rem;
+}
+
 .canvas-section {
+  flex: 1;
   max-width: 1200px;
   margin: 0 auto;
-  padding-top: 1rem;
 }
 
 .canvas-title {
@@ -456,6 +470,245 @@
 
 .tip span {
   font-size: 1.3rem;
+}
+
+/* Sidebars */
+.sidebar {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 40;
+  transition: all 0.3s ease;
+}
+
+.sidebar.stickers-sidebar {
+  right: 0;
+}
+
+.sidebar.photo-sidebar {
+  right: 70px;
+}
+
+.sidebar.draw-sidebar {
+  right: 140px;
+}
+
+.sidebar-toggle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60px;
+  height: 60px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s;
+  padding: 0;
+}
+
+.sidebar-toggle:hover {
+  transform: translateY(-50%) scale(1.1);
+}
+
+.sidebar-toggle-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.draw-icon {
+  font-size: 1.8rem;
+}
+
+.sidebar-content {
+  width: 250px;
+  background: white;
+  border: 2px solid #FEDBDD;
+  border-radius: 12px;
+  border-right: none;
+  padding: 1.5rem;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.sidebar-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 0.6rem;
+  border: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover {
+  border-color: #FEDBDD;
+  color: #9b5a6b;
+}
+
+.tab-btn.active {
+  background: #FEDBDD;
+  border-color: #FEDBDD;
+  color: #9b5a6b;
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.stickers-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.sticker-btn {
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sticker-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+
+.sticker-btn:hover {
+  border-color: #FEDBDD;
+  background: #fff5f6;
+  transform: scale(1.1);
+}
+
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.photo-thumbnail {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.photo-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-thumbnail:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.add-photo-btn {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 28px;
+  height: 28px;
+  background: #FEDBDD;
+  border: none;
+  border-radius: 50%;
+  color: #9b5a6b;
+  font-weight: bold;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  opacity: 0;
+}
+
+.photo-thumbnail:hover .add-photo-btn {
+  opacity: 1;
+}
+
+.add-photo-btn:hover {
+  background: #fcc7ce;
+  transform: scale(1.1);
+}
+
+.empty-message {
+  text-align: center;
+  color: #999;
+  font-size: 0.85rem;
+  padding: 2rem 0;
+}
+
+.draw-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.draw-tool-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+}
+
+.draw-tool-btn:hover {
+  border-color: #FEDBDD;
+  color: #9b5a6b;
+  background: #fff5f6;
+}
+
+.draw-tool-btn span:first-child {
+  font-size: 1.5rem;
+}
+
+/* Sticker Image Styling */
+.sticker-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .tip p {

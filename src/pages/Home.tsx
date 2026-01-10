@@ -5,8 +5,14 @@ import { analyzeReceipt } from '../services/gemini';
 import '../styles/Home.css';
 import '../styles/CollageEditor.css';
 
-const STICKERS = [
-  '😊', '🎉', '🍔', '🎂', '☕', '🍕', '💝', '✨', '🌟', '💫', '🎨', '🎭'
+const STICKER_FILES = [
+  'sticker_5.png', 'sticker_6.png', 'sticker_7.png', 'sticker_8.png',
+  'sticker_9.png', 'sticker_10.png', 'sticker_11.png', 'sticker_12.png',
+  'sticker_13.png', 'sticker_14.png', 'sticker_15.png', 'sticker_16.png',
+  'sticker_17.png', 'sticker_19.png', 'sticker_20.png', 'sticker_21.png',
+  'sticker_22.png', 'sticker_23.png', 'sticker_24.png', 'sticker_25.png',
+  'sticker_26.png', 'sticker_27.png', 'sticker_28.png', 'sticker_29.png',
+  'sticker_30.png', 'sticker_31.png', 'sticker_32.png'
 ];
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -28,6 +34,10 @@ export default function Home() {
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<CollageItem | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [stickerSidebarOpen, setStickerSidebarOpen] = useState(false);
+  const [stickerTab, setStickerTab] = useState<'stickers' | 'photos'>('stickers');
+  const [photoSidebarOpen, setPhotoSidebarOpen] = useState(false);
+  const [drawSidebarOpen, setDrawSidebarOpen] = useState(false);
 
   // Count images and receipts
   const imageCount = items.filter(i => i.type === 'image' && !i.id.startsWith('receipt-')).length;
@@ -103,7 +113,7 @@ export default function Home() {
     e.target.value = '';
   };
 
-  const addSticker = (emoji: string) => {
+  const addSticker = (stickerFile: string) => {
     const newItem: CollageItem = {
       id: `sticker-${Date.now()}`,
       type: 'sticker',
@@ -111,7 +121,7 @@ export default function Home() {
       y: 50 + Math.random() * 100,
       rotation: 0,
       scale: 1,
-      content: emoji
+      content: `/stickers/${stickerFile}`
     };
     addCollageItem(newItem);
   };
@@ -143,16 +153,16 @@ export default function Home() {
 
         <div className="upload-cards-container">
           <div className="upload-card">
-            <div className="upload-icon">📄</div>
-            <h3>Upload Receipt</h3>
-            <p>AI will analyze your receipt automatically</p>
             <button 
-              className="choose-btn choose-btn-dark"
+              className="upload-icon-btn"
               onClick={() => receiptInputRef.current?.click()}
               disabled={isAnalyzing}
+              title="Upload Receipt"
             >
-              {isAnalyzing ? '🔄 Analyzing...' : 'Choose Receipt'}
+              <img src="/receipt.png" alt="Upload Receipt" className="upload-icon-img" />
             </button>
+            <h3>Upload Receipt ({receiptCount})</h3>
+            <p>AI will analyze your receipt automatically</p>
             <input
               ref={receiptInputRef}
               type="file"
@@ -164,15 +174,15 @@ export default function Home() {
           </div>
 
           <div className="upload-card">
-            <div className="upload-icon">🖼</div>
-            <h3>Add Photos</h3>
-            <p>Upload any photos to include in your memory collage</p>
             <button 
-              className="choose-btn choose-btn-light"
+              className="upload-icon-btn"
               onClick={() => photoInputRef.current?.click()}
+              title="Add Photos"
             >
-              Choose Photo
+              <img src="/photo.png" alt="Add Photos" className="upload-icon-img" />
             </button>
+            <h3>Add Photos ({imageCount})</h3>
+            <p>Upload any photos to include in your memory collage</p>
             <input
               ref={photoInputRef}
               type="file"
@@ -181,23 +191,6 @@ export default function Home() {
               onChange={handlePhotoUpload}
               hidden
             />
-          </div>
-
-          <div className="upload-card">
-            <div className="upload-icon">✨</div>
-            <h3>Add Stickers</h3>
-            <p>Decorate your collage with fun stickers</p>
-            <div className="sticker-grid">
-              {STICKERS.slice(0, 6).map((emoji) => (
-                <button 
-                  key={emoji} 
-                  className="sticker-btn-small"
-                  onClick={() => addSticker(emoji)}
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
 
@@ -225,38 +218,151 @@ export default function Home() {
         )}
       </div>
 
-      {/* Canvas Section */}
-      <div className="canvas-section">
-        <h3 className="canvas-title">✦ Your Memory Collage</h3>
-        <div 
-          ref={canvasRef} 
-          className="canvas"
-          onClick={(e) => {
-            // Deselect when clicking on canvas background (not on items)
-            if (e.target === e.currentTarget) {
-              setSelectedItem(null);
-            }
-          }}
-        >
-          {items.filter(i => !['paperclip', 'smiley'].includes(i.type)).length === 0 && (
-            <div className="empty-state">
-              <div className="empty-icon">✦</div>
-              <h2>Your Canvas is Empty</h2>
-              <p>Start creating your memory collage by adding receipts, photos, and stickers above</p>
+      {/* Canvas Section with Sidebars */}
+      <div className="canvas-wrapper">
+        <div className="canvas-section">
+          <h3 className="canvas-title">✦ Your Memory Collage</h3>
+          <div 
+            ref={canvasRef} 
+            className="canvas"
+            onClick={(e) => {
+              // Deselect when clicking on canvas background (not on items)
+              if (e.target === e.currentTarget) {
+                setSelectedItem(null);
+              }
+            }}
+          >
+            {items.filter(i => !['paperclip', 'smiley'].includes(i.type)).length === 0 && (
+              <div className="empty-state">
+                <div className="empty-icon">✦</div>
+                <h2>Your Canvas is Empty</h2>
+                <p>Start creating your memory collage by adding receipts and photos above</p>
+              </div>
+            )}
+            
+            {items.map((item) => (
+              <CollageItemComponent
+                key={item.id}
+                item={item}
+                selected={selectedItem === item.id}
+                onSelect={() => setSelectedItem(item.id)}
+                onUpdate={(updates) => updateItem(item.id, updates)}
+                onDelete={() => deleteItem(item.id)}
+                onReceiptClick={() => handleReceiptClick(item)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Stickers/Photos Sidebar */}
+        <div className={`sidebar stickers-sidebar ${stickerSidebarOpen ? 'open' : ''}`}>
+          <button 
+            className="sidebar-toggle"
+            onClick={() => setStickerSidebarOpen(!stickerSidebarOpen)}
+            title="Stickers & Photos"
+          >
+            <img src="/stickers.png" alt="Stickers" className="sidebar-toggle-img" />
+          </button>
+          
+          {stickerSidebarOpen && (
+            <div className="sidebar-content">
+              <div className="sidebar-tabs">
+                <button 
+                  className={`tab-btn ${stickerTab === 'stickers' ? 'active' : ''}`}
+                  onClick={() => setStickerTab('stickers')}
+                >
+                  Stickers
+                </button>
+                <button 
+                  className={`tab-btn ${stickerTab === 'photos' ? 'active' : ''}`}
+                  onClick={() => setStickerTab('photos')}
+                >
+                  Photos
+                </button>
+              </div>
+
+              {stickerTab === 'stickers' && (
+                <div className="sidebar-section">
+                  <div className="stickers-grid">
+                    {STICKER_FILES.map((file) => (
+                      <button 
+                        key={file} 
+                        className="sticker-btn"
+                        onClick={() => {
+                          addSticker(file);
+                          setStickerSidebarOpen(false);
+                        }}
+                        title={`Add ${file}`}
+                      >
+                        <img src={`/stickers/${file}`} alt={file} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {stickerTab === 'photos' && (
+                <div className="sidebar-section">
+                  {items.filter(i => i.type === 'image' && i.id.startsWith('photo-')).length === 0 ? (
+                    <div className="empty-message">No photos uploaded yet</div>
+                  ) : (
+                    <div className="photos-grid">
+                      {items.filter(i => i.type === 'image' && i.id.startsWith('photo-')).map((item) => (
+                        <div key={item.id} className="photo-thumbnail">
+                          <img src={item.content} alt="Uploaded" />
+                          <button 
+                            className="add-photo-btn"
+                            onClick={() => {
+                              addCollageItem({
+                                id: `photo-copy-${Date.now()}`,
+                                type: 'image',
+                                x: 150 + Math.random() * 200,
+                                y: 120 + Math.random() * 150,
+                                rotation: Math.random() * 10 - 5,
+                                scale: 0.8,
+                                content: item.content
+                              });
+                            }}
+                            title="Add to canvas"
+                          >
+                            +
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
+        </div>
+
+        {/* Draw/Text Sidebar */}
+        <div className={`sidebar draw-sidebar ${drawSidebarOpen ? 'open' : ''}`}>
+          <button 
+            className="sidebar-toggle"
+            onClick={() => setDrawSidebarOpen(!drawSidebarOpen)}
+            title="Draw & Text"
+          >
+            <span className="draw-icon">✏️</span>
+          </button>
           
-          {items.map((item) => (
-            <CollageItemComponent
-              key={item.id}
-              item={item}
-              selected={selectedItem === item.id}
-              onSelect={() => setSelectedItem(item.id)}
-              onUpdate={(updates) => updateItem(item.id, updates)}
-              onDelete={() => deleteItem(item.id)}
-              onReceiptClick={() => handleReceiptClick(item)}
-            />
-          ))}
+          {drawSidebarOpen && (
+            <div className="sidebar-content">
+              <div className="sidebar-section">
+                <div className="draw-tools">
+                  <button className="draw-tool-btn">
+                    <span>✏️</span>
+                    <span>Draw</span>
+                  </button>
+                  <button className="draw-tool-btn">
+                    <span>📝</span>
+                    <span>Text</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -471,7 +577,11 @@ function CollageItemComponent({ item, selected, onSelect, onUpdate, onDelete, on
         onMouseDown={handleResizeStart}
         title="Resize"
       />
-      {item.type === 'sticker' && <span className="sticker-content">{item.content}</span>}
+      {item.type === 'sticker' && item.content.startsWith('/') ? (
+        <img src={item.content} alt="sticker" className="sticker-image" draggable={false} />
+      ) : item.type === 'sticker' ? (
+        <span className="sticker-content">{item.content}</span>
+      ) : null}
       {item.type === 'image' && <img src={item.content} alt="collage item" draggable={false} />}
       {item.type === 'smiley' && (
         <span className="smiley-content" style={{ color: item.color }}>{item.content}</span>
