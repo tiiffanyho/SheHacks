@@ -28,6 +28,8 @@ export default function Home() {
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<CollageItem | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState<'stickers' | 'photos'>('stickers');
 
   // Count images and receipts
   const imageCount = items.filter(i => i.type === 'image' && !i.id.startsWith('receipt-')).length;
@@ -241,21 +243,83 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Stickers Sidebar */}
-      <div className="stickers-sidebar">
-        <h4>Add Stickers</h4>
-        <img src="/stickers.png" alt="Stickers" className="stickers-icon" />
-        <div className="stickers-grid">
-          {STICKERS.map((emoji) => (
-            <button 
-              key={emoji} 
-              className="sticker-btn"
-              onClick={() => addSticker(emoji)}
-            >
-              {emoji}
-            </button>
-          ))}
-        </div>
+      {/* Collapsible Sidebar */}
+      <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <button 
+          className="sidebar-toggle"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          <span className="toggle-arrow">{">"}</span>
+        </button>
+        
+        {sidebarOpen && (
+          <div className="sidebar-content">
+            <div className="sidebar-tabs">
+              <button 
+                className={`tab-btn ${sidebarTab === 'stickers' ? 'active' : ''}`}
+                onClick={() => setSidebarTab('stickers')}
+              >
+                Stickers
+              </button>
+              <button 
+                className={`tab-btn ${sidebarTab === 'photos' ? 'active' : ''}`}
+                onClick={() => setSidebarTab('photos')}
+              >
+                Photos
+              </button>
+            </div>
+
+            {sidebarTab === 'stickers' && (
+              <div className="sidebar-section">
+                <img src="/stickers.png" alt="Stickers" className="sidebar-icon" />
+                <div className="stickers-grid">
+                  {STICKERS.map((emoji) => (
+                    <button 
+                      key={emoji} 
+                      className="sticker-btn"
+                      onClick={() => addSticker(emoji)}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {sidebarTab === 'photos' && (
+              <div className="sidebar-section">
+                <h4>Uploaded Photos</h4>
+                {items.filter(i => i.type === 'image' && i.id.startsWith('photo-')).length === 0 ? (
+                  <p className="empty-message">No photos uploaded yet. Upload photos from the section above!</p>
+                ) : (
+                  <div className="photos-grid">
+                    {items.filter(i => i.type === 'image' && i.id.startsWith('photo-')).map((item) => (
+                      <div key={item.id} className="photo-thumbnail">
+                        <img src={item.content} alt="Uploaded" />
+                        <button 
+                          className="add-photo-btn"
+                          onClick={() => {
+                            addCollageItem({
+                              id: `photo-copy-${Date.now()}`,
+                              type: 'image',
+                              x: 150 + Math.random() * 200,
+                              y: 120 + Math.random() * 150,
+                              rotation: Math.random() * 10 - 5,
+                              scale: 0.8,
+                              content: item.content
+                            });
+                          }}
+                        >
+                          +
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
       </div>
 
