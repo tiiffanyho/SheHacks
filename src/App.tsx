@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Home from './pages/Home';
 import { useStore } from './store';
 import './App.css';
 
 function App() {
-  const memories = useStore((state) => state.memories);
-  const total = memories.reduce((sum, m) => sum + m.receiptData.total, 0);
+  const { collageItems, getTotalSpent } = useStore();
+  const receiptCount = collageItems.filter(item => item.id.startsWith('receipt-')).length;
+  const totalSpent = getTotalSpent();
 
   return (
     <div className="app">
@@ -22,11 +23,11 @@ function App() {
         <div className="header-stats">
           <div className="stat">
             <span className="stat-label">Receipts</span>
-            <span className="stat-value">{memories.length}</span>
+            <span className="stat-value">{receiptCount}</span>
           </div>
           <div className="stat">
             <span className="stat-label">Total Spent</span>
-            <span className="stat-value">${total.toFixed(2)}</span>
+            <span className="stat-value">${totalSpent.toFixed(2)}</span>
           </div>
         </div>
       </header>
