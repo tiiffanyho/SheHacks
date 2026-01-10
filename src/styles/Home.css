@@ -1,91 +1,129 @@
 .home {
+  background: white;
+  min-height: calc(100vh - 200px);
+  padding: 3rem 2rem;
+}
+
+.home-container {
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.hero {
-  text-align: center;
-  padding: 3rem 2rem;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.home-header {
   margin-bottom: 3rem;
 }
 
-.hero h2 {
+.home-header h2 {
   font-size: 2.5rem;
-  margin-bottom: 1rem;
-  color: #667eea;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 0.5rem 0;
 }
 
-.hero p {
+.home-header p {
   font-size: 1.1rem;
   color: #666;
-  margin-bottom: 2rem;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0;
 }
 
-.cta-buttons {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.btn-large {
-  padding: 1rem 2rem;
-  font-size: 1.1rem;
-}
-
-.features {
-  background: white;
-  padding: 3rem 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.features h3 {
-  text-align: center;
-  font-size: 2rem;
-  margin-bottom: 2rem;
-  color: #667eea;
-}
-
-.feature-grid {
+.upload-cards-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   gap: 2rem;
+  margin-bottom: 2rem;
 }
 
-.feature-card {
+.upload-card {
+  border: 2px dashed #d0d0d0;
+  border-radius: 12px;
   padding: 2rem;
-  background: #f9f9f9;
-  border-radius: 8px;
   text-align: center;
-  border: 2px solid #eee;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
   transition: all 0.3s;
 }
 
-.feature-card:hover {
-  border-color: #667eea;
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.2);
+.upload-card:hover {
+  border-color: #999;
+  background: #f5f5f5;
 }
 
-.feature-icon {
+.upload-icon {
   font-size: 3rem;
-  display: block;
-  margin-bottom: 1rem;
+  width: 80px;
+  height: 80px;
+  background: #e8e8e8;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.feature-card h4 {
-  color: #667eea;
-  margin-bottom: 0.5rem;
+.upload-card h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #000;
+  margin: 0;
 }
 
-.feature-card p {
+.upload-card p {
+  color: #666;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.choose-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s;
+}
+
+.choose-btn-dark {
+  background: #000;
+  color: white;
+}
+
+.choose-btn-dark:hover {
+  background: #333;
+}
+
+.choose-btn-light {
+  background: white;
+  color: #000;
+  border: 1px solid #d0d0d0;
+}
+
+.choose-btn-light:hover {
+  border-color: #000;
+  background: #f9f9f9;
+}
+
+.tip {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: #fffaeb;
+  border-radius: 8px;
+  border-left: 4px solid #ffd700;
+}
+
+.tip span {
+  font-size: 1.3rem;
+}
+
+.tip p {
+  margin: 0;
   color: #666;
   font-size: 0.95rem;
 }

@@ -1,62 +1,70 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import '../styles/Home.css';
 
 interface HomeProps {
-  setPage: (page: 'scan' | 'collage' | 'weekly') => void;
+  setPage: (page: 'scan' | 'collage') => void;
 }
 
 export default function Home({ setPage }: HomeProps) {
+  const receiptInputRef = useRef<HTMLInputElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
   return (
     <div className="home">
-      <section className="hero">
-        <h2>Capture Your Everyday Moments</h2>
-        <p>Transform receipts into treasured memories. Collect, create, and celebrate the little moments that make up your life.</p>
-        
-        <div className="cta-buttons">
-          <button className="btn-primary btn-large" onClick={() => setPage('scan')}>
-            📸 Start Scanning
-          </button>
-          <button className="btn-secondary btn-large" onClick={() => setPage('weekly')}>
-            📅 View Collections
-          </button>
+      <div className="home-container">
+        <div className="home-header">
+          <h2>Capture Your Moments</h2>
+          <p>Upload receipts to track expenses and turn everyday moments into lasting memories</p>
         </div>
-      </section>
 
-      <section className="features">
-        <h3>How It Works</h3>
-        <div className="feature-grid">
-          <div className="feature-card">
-            <span className="feature-icon">📸</span>
-            <h4>Scan Receipts</h4>
-            <p>Upload or capture photos of your receipts. Our AI reads and summarizes your spending.</p>
+        <div className="upload-cards-container">
+          <div className="upload-card">
+            <div className="upload-icon">📄</div>
+            <h3>Upload Receipt</h3>
+            <p>Drag & drop or click to upload receipt photos</p>
+            <button 
+              className="choose-btn choose-btn-dark"
+              onClick={() => receiptInputRef.current?.click()}
+            >
+              <span>⬆</span> Choose Receipt
+            </button>
+            <input
+              ref={receiptInputRef}
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                if (e.target.files?.[0]) {
+                  setPage('scan');
+                }
+              }}
+              hidden
+            />
           </div>
-          <div className="feature-card">
-            <span className="feature-icon">💰</span>
-            <h4>Expense Tracking</h4>
-            <p>Get instant summaries of your purchases and spending patterns by week or month.</p>
-          </div>
-          <div className="feature-card">
-            <span className="feature-icon">✨</span>
-            <h4>Create Stickers</h4>
-            <p>Turn receipts into beautiful stickers to make them more memorable and collectible.</p>
-          </div>
-          <div className="feature-card">
-            <span className="feature-icon">🎨</span>
-            <h4>Build Collages</h4>
-            <p>Drag and drop stickers, images, and designs onto an interactive whiteboard canvas.</p>
-          </div>
-          <div className="feature-card">
-            <span className="feature-icon">📷</span>
-            <h4>Add Photos</h4>
-            <p>Upload any photos to mix with your stickers for a complete visual story.</p>
-          </div>
-          <div className="feature-card">
-            <span className="feature-icon">📅</span>
-            <h4>Collections</h4>
-            <p>View your memories organized by week or month to see your story unfold.</p>
+
+          <div className="upload-card">
+            <div className="upload-icon">🖼</div>
+            <h3>Add Photos</h3>
+            <p>Upload any photos to include in your memory collage</p>
+            <button 
+              className="choose-btn choose-btn-light"
+              onClick={() => photoInputRef.current?.click()}
+            >
+              <span>⬆</span> Choose Photo
+            </button>
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              hidden
+            />
           </div>
         </div>
-      </section>
+
+        <div className="tip">
+          <span>💡</span>
+          <p>Tip: Take clear photos of your receipts to capture the details of your everyday moments</p>
+        </div>
+      </div>
     </div>
   );
 }

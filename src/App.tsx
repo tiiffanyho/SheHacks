@@ -3,31 +3,65 @@ import Home from './pages/Home';
 import ReceiptScanner from './pages/ReceiptScanner';
 import CollageEditor from './pages/CollageEditor';
 import WeeklyView from './pages/WeeklyView';
+import { useStore } from './store';
 import './App.css';
 
 type PageType = 'home' | 'scan' | 'collage' | 'weekly';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<PageType>('home');
+  const memories = useStore((state) => state.memories);
+  const total = memories.reduce((sum, m) => sum + m.receiptData.total, 0);
 
   return (
     <div className="app">
-      <nav className="navbar">
-        <h1 onClick={() => setCurrentPage('home')} style={{ cursor: 'pointer' }}>
-          🎨 ReCollect
-        </h1>
-        <div className="nav-links">
-          <button onClick={() => setCurrentPage('scan')}>📸 Scan Receipt</button>
-          <button onClick={() => setCurrentPage('collage')}>✨ Collage</button>
-          <button onClick={() => setCurrentPage('weekly')}>📅 Collections</button>
+      <header className="header">
+        <div className="header-left">
+          <div className="logo">
+            <span className="logo-icon">✦</span>
+            <div>
+              <h1>Recollect</h1>
+              <p>Turn everyday moments into lasting memories</p>
+            </div>
+          </div>
         </div>
+        <div className="header-stats">
+          <div className="stat">
+            <span className="stat-label">Receipts</span>
+            <span className="stat-value">{memories.length}</span>
+          </div>
+          <div className="stat">
+            <span className="stat-label">Total Spent</span>
+            <span className="stat-value">${total.toFixed(2)}</span>
+          </div>
+        </div>
+      </header>
+
+      <nav className="navbar">
+        <button 
+          className={`nav-item ${currentPage === 'home' ? 'active' : ''}`}
+          onClick={() => setCurrentPage('home')}
+        >
+          <span className="nav-icon">📋</span> Upload
+        </button>
+        <button 
+          className={`nav-item ${currentPage === 'scan' ? 'active' : ''}`}
+          onClick={() => setCurrentPage('scan')}
+        >
+          <span className="nav-icon">📊</span> Summary
+        </button>
+        <button 
+          className={`nav-item ${currentPage === 'collage' ? 'active' : ''}`}
+          onClick={() => setCurrentPage('collage')}
+        >
+          <span className="nav-icon">🎨</span> Memory Collage
+        </button>
       </nav>
 
-      <main>
+      <main className="main-content">
         {currentPage === 'home' && <Home setPage={setCurrentPage} />}
         {currentPage === 'scan' && <ReceiptScanner />}
         {currentPage === 'collage' && <CollageEditor />}
-        {currentPage === 'weekly' && <WeeklyView />}
       </main>
     </div>
   );
