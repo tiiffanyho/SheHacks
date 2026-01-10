@@ -143,14 +143,14 @@ export default function Home() {
 
         <div className="upload-cards-container">
           <div className="upload-card">
-            <div className="upload-icon">📄</div>
-            <h3>Upload Receipt ({receiptCount})</h3>
-            <p>Drag & drop or click to upload receipt photos</p>
             <button 
               onClick={() => receiptInputRef.current?.click()}
+              className="receipt-upload-btn"
             >
-              Choose Receipt
+              <img src="/button.png" alt="Upload Receipt" className="receipt-btn-icon" />
             </button>
+            <h3>Upload Receipt ({receiptCount})</h3>
+            <p>Drag & drop or click to upload receipt photos</p>
             <input
               ref={receiptInputRef}
               type="file"
@@ -162,15 +162,14 @@ export default function Home() {
           </div>
 
           <div className="upload-card">
-            <div className="upload-icon">🖼</div>
+            <button 
+              onClick={() => photoInputRef.current?.click()}
+              className="photo-upload-btn"
+            >
+              <img src="/photo.png" alt="Add Photos" className="photo-btn-icon" />
+            </button>
             <h3>Add Photos ({imageCount})</h3>
             <p>Upload any photos to include in your memory collage</p>
-            <button 
-              className="choose-btn choose-btn-light"
-              onClick={() => photoInputRef.current?.click()}
-            >
-              Choose Photo
-            </button>
             <input
               ref={photoInputRef}
               type="file"
@@ -179,23 +178,6 @@ export default function Home() {
               onChange={handlePhotoUpload}
               hidden
             />
-          </div>
-
-          <div className="upload-card">
-            <img src="/stickers.png" alt="Add Stickers" className="upload-icon-image" />
-            <h3>Add Stickers</h3>
-            <p>Decorate your collage with fun stickers</p>
-            <div className="sticker-grid">
-              {STICKERS.slice(0, 6).map((emoji) => (
-                <button 
-                  key={emoji} 
-                  className="sticker-btn-small"
-                  onClick={() => addSticker(emoji)}
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
 
@@ -223,19 +205,20 @@ export default function Home() {
         )}
       </div>
 
-      {/* Canvas Section */}
-      <div className="canvas-section">
-        <h3 className="canvas-title">✦ Your Memory Collage</h3>
-        <div 
-          ref={canvasRef} 
-          className="canvas"
-          onClick={(e) => {
-            // Deselect when clicking on canvas background (not on items)
-            if (e.target === e.currentTarget) {
-              setSelectedItem(null);
-            }
-          }}
-        >
+      {/* Canvas Section with Stickers Sidebar */}
+      <div className="canvas-wrapper">
+        <div className="canvas-section">
+          <h3 className="canvas-title">✦ Your Memory Collage</h3>
+          <div 
+            ref={canvasRef} 
+            className="canvas"
+            onClick={(e) => {
+              // Deselect when clicking on canvas background (not on items)
+              if (e.target === e.currentTarget) {
+                setSelectedItem(null);
+              }
+            }}
+          >
           {items.filter(i => !['paperclip', 'smiley'].includes(i.type)).length === 0 && (
             <div className="empty-state">
               <div className="empty-icon">✦</div>
@@ -256,6 +239,24 @@ export default function Home() {
             />
           ))}
         </div>
+      </div>
+
+      {/* Stickers Sidebar */}
+      <div className="stickers-sidebar">
+        <h4>Add Stickers</h4>
+        <img src="/stickers.png" alt="Stickers" className="stickers-icon" />
+        <div className="stickers-grid">
+          {STICKERS.map((emoji) => (
+            <button 
+              key={emoji} 
+              className="sticker-btn"
+              onClick={() => addSticker(emoji)}
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+      </div>
       </div>
 
       {/* Receipt Details Modal */}
