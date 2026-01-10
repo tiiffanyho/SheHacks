@@ -1,87 +1,65 @@
-# Welcome to React Router!
+# ReceiptJars
 
-A modern, production-ready template for building full-stack React applications using React Router.
-
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+ReceiptJars is a React + Vite web app for turning receipts and photos into a memory collage. Upload receipts to auto-extract purchase details with Gemini, add photos and stickers, and see a simple spending breakdown by category.
 
 ## Features
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+- Receipt uploads with AI-powered extraction (merchant, date, total, category, items)
+- Photo uploads and draggable collage items
+- Stickers for quick decoration
+- Spending summary by category
 
-## Getting Started
+## Tech stack
 
-### Installation
+- React + TypeScript
+- Vite
+- Zustand state management
+- Gemini API for receipt analysis
 
-Install the dependencies:
+## Getting started
+
+### 1) Install dependencies
 
 ```bash
 npm install
 ```
 
-### Development
+### 2) Configure environment
 
-Start the development server with HMR:
+Create a `.env` file in the project root with your Gemini API key:
+
+```bash
+VITE_GEMINI_API_KEY=your_api_key_here
+```
+
+### 3) Run the app
 
 ```bash
 npm run dev
 ```
 
-Your application will be available at `http://localhost:5173`.
+The app will be available at `http://localhost:5173`.
 
-## Building for Production
-
-Create a production build:
+## Build for production
 
 ```bash
 npm run build
 ```
 
-## Deployment
-
-### Docker Deployment
-
-To build and run using Docker:
+Preview the production build locally:
 
 ```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
+npm run preview
 ```
 
-The containerized application can be deployed to any platform that supports Docker, including:
+## Project structure
 
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
+- `src/pages/Home.tsx`: main collage workflow and receipt handling
+- `src/services/gemini.ts`: Gemini API integration and receipt parsing
+- `src/store.ts`: Zustand store for collage items and totals
+- `src/styles/`: component-level styles
 
-### DIY Deployment
+## Notes
 
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+- Receipt analysis depends on the Gemini API and requires a valid API key.
+- If the API rate limits or a model is unavailable, the app falls back to other Gemini models.
