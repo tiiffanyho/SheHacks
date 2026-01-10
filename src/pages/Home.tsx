@@ -28,10 +28,13 @@ export default function Home() {
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<CollageItem | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+<<<<<<< HEAD
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<'stickers' | 'photos'>('stickers');
   const [photoSidebarOpen, setPhotoSidebarOpen] = useState(false);
   const [drawSidebarOpen, setDrawSidebarOpen] = useState(false);
+=======
+>>>>>>> main
 
   // Count images and receipts
   const imageCount = items.filter(i => i.type === 'image' && !i.id.startsWith('receipt-')).length;
@@ -147,11 +150,22 @@ export default function Home() {
 
         <div className="upload-cards-container">
           <div className="upload-card">
+<<<<<<< HEAD
+=======
+            <div className="upload-icon">📄</div>
+            <h3>Upload Receipt</h3>
+            <p>AI will analyze your receipt automatically</p>
+>>>>>>> main
             <button 
+              className="choose-btn choose-btn-dark"
               onClick={() => receiptInputRef.current?.click()}
-              className="receipt-upload-btn"
+              disabled={isAnalyzing}
             >
+<<<<<<< HEAD
               <img src="/button.png" alt="Upload Receipt" className="receipt-btn-icon" />
+=======
+              {isAnalyzing ? '🔄 Analyzing...' : 'Choose Receipt'}
+>>>>>>> main
             </button>
             <h3>Upload Receipt ({receiptCount})</h3>
             <p>Drag & drop or click to upload receipt photos</p>
@@ -166,6 +180,7 @@ export default function Home() {
           </div>
 
           <div className="upload-card">
+<<<<<<< HEAD
             <button 
               onClick={() => photoInputRef.current?.click()}
               className="photo-upload-btn"
@@ -173,6 +188,10 @@ export default function Home() {
               <img src="/photo.png" alt="Add Photos" className="photo-btn-icon" />
             </button>
             <h3>Add Photos ({imageCount})</h3>
+=======
+            <div className="upload-icon">🖼</div>
+            <h3>Add Photos</h3>
+>>>>>>> main
             <p>Upload any photos to include in your memory collage</p>
             <input
               ref={photoInputRef}
@@ -185,6 +204,7 @@ export default function Home() {
           </div>
         </div>
 
+<<<<<<< HEAD
         {/* Budget Summary */}
         {Object.keys(spendingByCategory).length > 0 && (
           <div className="budget-summary">
@@ -223,6 +243,63 @@ export default function Home() {
               }
             }}
           >
+=======
+          <div className="upload-card">
+            <div className="upload-icon">✨</div>
+            <h3>Add Stickers</h3>
+            <p>Decorate your collage with fun stickers</p>
+            <div className="sticker-grid">
+              {STICKERS.slice(0, 6).map((emoji) => (
+                <button 
+                  key={emoji} 
+                  className="sticker-btn-small"
+                  onClick={() => addSticker(emoji)}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Budget Summary */}
+        {Object.keys(spendingByCategory).length > 0 && (
+          <div className="budget-summary">
+            <h4>📊 Spending by Category</h4>
+            <div className="category-bars">
+              {Object.entries(spendingByCategory).map(([category, amount]) => (
+                <div key={category} className="category-bar">
+                  <span className="category-label">
+                    {CATEGORY_ICONS[category] || '📦'} {category}
+                  </span>
+                  <div className="bar-container">
+                    <div 
+                      className="bar-fill" 
+                      style={{ width: `${Math.min((amount / totalSpent) * 100, 100)}%` }}
+                    />
+                  </div>
+                  <span className="category-amount">${amount.toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Canvas Section */}
+      <div className="canvas-section">
+        <h3 className="canvas-title">✦ Your Memory Collage</h3>
+        <div 
+          ref={canvasRef} 
+          className="canvas"
+          onClick={(e) => {
+            // Deselect when clicking on canvas background (not on items)
+            if (e.target === e.currentTarget) {
+              setSelectedItem(null);
+            }
+          }}
+        >
+>>>>>>> main
           {items.filter(i => !['paperclip', 'smiley'].includes(i.type)).length === 0 && (
             <div className="empty-state">
               <div className="empty-icon">✦</div>
@@ -245,6 +322,7 @@ export default function Home() {
         </div>
       </div>
 
+<<<<<<< HEAD
       {/* Collapsible Sidebar */}
       <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <button 
@@ -398,6 +476,8 @@ export default function Home() {
       </div>
       </div>
 
+=======
+>>>>>>> main
       {/* Receipt Details Modal */}
       {selectedReceipt && selectedReceipt.receiptData && (
         <div className="receipt-modal-overlay" onClick={() => setSelectedReceipt(null)}>
