@@ -228,7 +228,16 @@ export default function Home() {
       {/* Canvas Section */}
       <div className="canvas-section">
         <h3 className="canvas-title">✦ Your Memory Collage</h3>
-        <div ref={canvasRef} className="canvas">
+        <div 
+          ref={canvasRef} 
+          className="canvas"
+          onClick={(e) => {
+            // Deselect when clicking on canvas background (not on items)
+            if (e.target === e.currentTarget) {
+              setSelectedItem(null);
+            }
+          }}
+        >
           {items.filter(i => !['paperclip', 'smiley'].includes(i.type)).length === 0 && (
             <div className="empty-state">
               <div className="empty-icon">✦</div>
