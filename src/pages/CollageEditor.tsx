@@ -1,37 +1,17 @@
 import React, { useRef, useState } from 'react';
 import { useStore } from '../store';
+import type { CollageItem } from '../store';
 import '../styles/CollageEditor.css';
-
-interface CollageItem {
-  id: string;
-  type: 'sticker' | 'image' | 'text' | 'paperclip' | 'smiley';
-  x: number;
-  y: number;
-  rotation: number;
-  scale: number;
-  content: string;
-  color?: string;
-}
 
 const STICKERS = [
   '😊', '🎉', '🍔', '🎂', '☕', '🍕', '💝', '✨', '🌟', '💫', '🎨', '🎭'
-];
-
-// Initial decorative items
-const INITIAL_DECORATIONS: CollageItem[] = [
-  { id: 'smiley-1', type: 'smiley', x: 40, y: 30, rotation: -10, scale: 1, content: '☺', color: '#ffb6c1' },
-  { id: 'smiley-2', type: 'smiley', x: 500, y: 350, rotation: 15, scale: 1.2, content: '☺', color: '#87ceeb' },
-  { id: 'smiley-3', type: 'smiley', x: 550, y: 200, rotation: -5, scale: 0.9, content: '☺', color: '#98d8aa' },
-  { id: 'clip-1', type: 'paperclip', x: 520, y: 15, rotation: 20, scale: 1, content: '', color: '#f5a5b8' },
-  { id: 'clip-2', type: 'paperclip', x: 30, y: 320, rotation: -15, scale: 1, content: '', color: '#a8d8ea' },
-  { id: 'clip-3', type: 'paperclip', x: 60, y: 180, rotation: 5, scale: 1, content: '', color: '#ffd93d' },
 ];
 
 export default function CollageEditor() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
-  const [items, setItems] = useState<CollageItem[]>(INITIAL_DECORATIONS);
+  const { collageItems: items, addCollageItem, updateCollageItem, deleteCollageItem } = useStore();
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
   // Count images and receipts
@@ -48,14 +28,14 @@ export default function CollageEditor() {
       scale: 1,
       content: emoji
     };
-    setItems([...items, newItem]);
+    addCollageItem(newItem);
   };
 
   const addImage = (file: File, isReceipt: boolean = false) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const newItem: CollageItem = {
-        id: isReceipt ? `receipt-${Date.now()}` : Date.now().toString(),
+        id: isReceipt ? `receipt-${Date.now()}` : `photo-${Date.now()}`,
         type: 'image',
         x: 100 + Math.random() * 200,
         y: 100 + Math.random() * 150,
@@ -63,7 +43,7 @@ export default function CollageEditor() {
         scale: 0.8,
         content: e.target?.result as string
       };
-      setItems(prev => [...prev, newItem]);
+      addCollageItem(newItem);
     };
     reader.readAsDataURL(file);
   };
@@ -85,11 +65,11 @@ export default function CollageEditor() {
   };
 
   const updateItem = (id: string, updates: Partial<CollageItem>) => {
-    setItems(items.map(item => item.id === id ? { ...item, ...updates } : item));
+    updateCollageItem(id, updates);
   };
 
   const deleteItem = (id: string) => {
-    setItems(items.filter(item => item.id !== id));
+    deleteCollageItem(id);
   };
 
   return (
@@ -140,13 +120,6 @@ export default function CollageEditor() {
           <span>T</span> Add Text
         </button>
 
-        <div className="canvas-controls">
-          <p className="section-label">Canvas Controls</p>
-          <button className="control-icon-btn">🔍-</button>
-          <button className="control-icon-btn">🔍+</button>
-        </div>
-
-        <p className="hint">Hold Shift + Drag to pan canvas</p>
       </div>
 
       <div className="collage-main">

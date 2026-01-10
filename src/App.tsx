@@ -1,15 +1,9 @@
 import React, { useState } from 'react';
 import Home from './pages/Home';
-import ReceiptScanner from './pages/ReceiptScanner';
-import CollageEditor from './pages/CollageEditor';
-import WeeklyView from './pages/WeeklyView';
 import { useStore } from './store';
 import './App.css';
 
-type PageType = 'home' | 'scan' | 'collage' | 'weekly';
-
 function App() {
-  const [currentPage, setCurrentPage] = useState<PageType>('home');
   const memories = useStore((state) => state.memories);
   const total = memories.reduce((sum, m) => sum + m.receiptData.total, 0);
 
@@ -37,31 +31,8 @@ function App() {
         </div>
       </header>
 
-      <nav className="navbar">
-        <button 
-          className={`nav-item ${currentPage === 'home' ? 'active' : ''}`}
-          onClick={() => setCurrentPage('home')}
-        >
-          Upload
-        </button>
-        <button 
-          className={`nav-item ${currentPage === 'scan' ? 'active' : ''}`}
-          onClick={() => setCurrentPage('scan')}
-        >
-          Summary
-        </button>
-        <button 
-          className={`nav-item ${currentPage === 'collage' ? 'active' : ''}`}
-          onClick={() => setCurrentPage('collage')}
-        >
-          Memory Collage
-        </button>
-      </nav>
-
       <main className="main-content">
-        {currentPage === 'home' && <Home setPage={setCurrentPage} />}
-        {currentPage === 'scan' && <ReceiptScanner />}
-        {currentPage === 'collage' && <CollageEditor />}
+        <Home />
       </main>
     </div>
   );
