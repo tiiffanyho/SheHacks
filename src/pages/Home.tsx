@@ -484,6 +484,22 @@ export default function Home() {
                   </div>
                 </div>
               )}
+
+              <div className="draw-option-group">
+                <button 
+                  className="clear-btn"
+                  onClick={() => {
+                    items.forEach(item => {
+                      if (item.type === 'line') {
+                        deleteItem(item.id);
+                      }
+                    });
+                  }}
+                  title="Clear all drawings"
+                >
+                  Clear Board
+                </button>
+              </div>
             </div>
           )}
         </div>

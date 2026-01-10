@@ -487,17 +487,17 @@
 
 .sidebar.stickers-sidebar {
   right: 20px;
-  top: calc(50% - 130px);
+  top: calc(50% - 120px);
 }
 
 .sidebar.photo-sidebar {
   right: 20px;
-  top: calc(50% - 40px);
+  top: calc(50% - 20px);
 }
 
 .sidebar.draw-sidebar {
   right: 20px;
-  top: calc(50% + 50px);
+  top: calc(50% + 80px);
 }
 
 .sidebar-toggle {
@@ -837,4 +837,26 @@
 .color-btn.active {
   border-color: #333;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.clear-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: #FF6B6B;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.clear-btn:hover {
+  background: #FF5252;
+  transform: scale(1.02);
+}
+
+.clear-btn:active {
+  transform: scale(0.98);
 }
