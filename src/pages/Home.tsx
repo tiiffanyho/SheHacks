@@ -139,17 +139,12 @@ export default function Home() {
         <div className="home-header">
           <h2>Capture Your Moments</h2>
           <p>Upload receipts and photos to create your memory collage</p>
-          {totalSpent > 0 && (
-            <div className="total-spent-badge">
-              💰 Total Spent: ${totalSpent.toFixed(2)}
-            </div>
-          )}
         </div>
 
         <div className="upload-cards-container">
           <div className="upload-card">
             <div className="upload-icon">📄</div>
-            <h3>Upload Receipt ({receiptCount})</h3>
+            <h3>Upload Receipt</h3>
             <p>AI will analyze your receipt automatically</p>
             <button 
               className="choose-btn choose-btn-dark"
@@ -312,13 +307,16 @@ interface CollageItemProps {
 function CollageItemComponent({ item, selected, onSelect, onUpdate, onDelete, onReceiptClick }: CollageItemProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [isRotating, setIsRotating] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [initialScale, setInitialScale] = useState(1);
+  const [initialRotation, setInitialRotation] = useState(0);
   const [initialMousePos, setInitialMousePos] = useState({ x: 0, y: 0 });
+  const itemRef = useRef<HTMLDivElement>(null);
   const clickStartTime = useRef(0);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (isResizing) return;
+    if (isResizing || isRotating) return;
     e.preventDefault();
     onSelect();
     clickStartTime.current = Date.now();
@@ -344,6 +342,15 @@ function CollageItemComponent({ item, selected, onSelect, onUpdate, onDelete, on
     onSelect();
     setIsResizing(true);
     setInitialScale(item.scale);
+    setInitialMousePos({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleRotateStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onSelect();
+    setIsRotating(true);
+    setInitialRotation(item.rotation);
     setInitialMousePos({ x: e.clientX, y: e.clientY });
   };
 
@@ -392,16 +399,42 @@ function CollageItemComponent({ item, selected, onSelect, onUpdate, onDelete, on
     }
   }, [isResizing, initialScale, initialMousePos, onUpdate]);
 
+  React.useEffect(() => {
+    if (isRotating && itemRef.current) {
+      const handleGlobalMouseMove = (e: MouseEvent) => {
+        const rect = itemRef.current!.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        // Calculate angle from center to mouse
+        const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+        const initialAngle = Math.atan2(initialMousePos.y - centerY, initialMousePos.x - centerX) * (180 / Math.PI);
+        
+        const newRotation = initialRotation + (angle - initialAngle);
+        onUpdate({ rotation: newRotation });
+      };
+      const handleGlobalMouseUp = () => setIsRotating(false);
+      
+      window.addEventListener('mousemove', handleGlobalMouseMove);
+      window.addEventListener('mouseup', handleGlobalMouseUp);
+      return () => {
+        window.removeEventListener('mousemove', handleGlobalMouseMove);
+        window.removeEventListener('mouseup', handleGlobalMouseUp);
+      };
+    }
+  }, [isRotating, initialRotation, initialMousePos, onUpdate]);
+
   const isReceipt = item.id.startsWith('receipt-');
 
   return (
     <div
+      ref={itemRef}
       className={`collage-item ${selected ? 'selected' : ''} ${item.type === 'paperclip' ? 'paperclip-item' : ''} ${item.type === 'smiley' ? 'smiley-item' : ''} ${isReceipt ? 'receipt-item' : ''}`}
       style={{
         left: `${item.x}px`,
         top: `${item.y}px`,
         transform: `rotate(${item.rotation}deg) scale(${item.scale})`,
-        cursor: isResizing ? 'nwse-resize' : isDragging ? 'grabbing' : isReceipt ? 'pointer' : 'grab'
+        cursor: isRotating ? 'grabbing' : isResizing ? 'nwse-resize' : isDragging ? 'grabbing' : isReceipt ? 'pointer' : 'grab'
       }}
       onMouseDown={handleMouseDown}
     >
@@ -417,6 +450,13 @@ function CollageItemComponent({ item, selected, onSelect, onUpdate, onDelete, on
       >
         ×
       </button>
+      <div 
+        className="rotate-handle"
+        onMouseDown={handleRotateStart}
+        title="Rotate"
+      >
+        ↻
+      </div>
       <div 
         className="resize-handle"
         onMouseDown={handleResizeStart}

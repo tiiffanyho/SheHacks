@@ -1,4 +1,4 @@
-const GEMINI_API_KEY = 'AIzaSyD0iEphw_l3sW15G5hrQuKgoSvTGTicyqU';
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 // Models to try in order (fallback chain)
 const GEMINI_MODELS = [
