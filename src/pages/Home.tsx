@@ -96,14 +96,14 @@ export default function Home() {
 
         <div className="upload-cards-container">
           <div className="upload-card">
-            <div className="upload-icon">📄</div>
+            <img src="/button.png" alt="Upload Receipt" className="upload-icon-image" />
             <h3>Upload Receipt ({receiptCount})</h3>
             <p>Drag & drop or click to upload receipt photos</p>
             <button 
-              className="choose-btn choose-btn-dark"
               onClick={() => receiptInputRef.current?.click()}
+              className="receipt-upload-btn"
             >
-              Choose Receipt
+              <img src="/receipt.png" alt="Choose Receipt" className="receipt-btn-icon" />
             </button>
             <input
               ref={receiptInputRef}
@@ -116,7 +116,7 @@ export default function Home() {
           </div>
 
           <div className="upload-card">
-            <div className="upload-icon">🖼</div>
+            <img src="/photo.png" alt="Add Photos" className="upload-icon-image" />
             <h3>Add Photos ({imageCount})</h3>
             <p>Upload any photos to include in your memory collage</p>
             <button 
@@ -136,7 +136,7 @@ export default function Home() {
           </div>
 
           <div className="upload-card">
-            <div className="upload-icon">✨</div>
+            <img src="/stickers.png" alt="Add Stickers" className="upload-icon-image" />
             <h3>Add Stickers</h3>
             <p>Decorate your collage with fun stickers</p>
             <div className="sticker-grid">

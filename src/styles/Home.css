@@ -48,7 +48,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.3rem;
   transition: all 0.3s;
 }
 
@@ -66,6 +66,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.upload-icon-image {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  margin-bottom: 1rem;
+}
+
+.icon-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
 }
 
 .upload-card h3 {
@@ -112,6 +126,29 @@
 .choose-btn-light:hover {
   border-color: #000;
   background: #f9f9f9;
+}
+
+.receipt-upload-btn {
+  width: 160px;
+  height: 160px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.receipt-upload-btn:hover {
+  transform: scale(1.1);
+}
+
+.receipt-btn-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .sticker-grid {
