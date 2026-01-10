@@ -31,7 +31,10 @@ export interface CollageItem {
   scale: number;
   content: string;
   color?: string;
+  fontFamily?: string;
+  fontSize?: number;
   receiptData?: ReceiptData;
+  lineWidth?: number;
 }
 
 interface Store {

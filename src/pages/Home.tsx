@@ -32,6 +32,7 @@ export default function Home() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const { collageItems: items, addCollageItem, updateCollageItem, deleteCollageItem, getTotalSpent } = useStore();
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [selectedItemForEditing, setSelectedItemForEditing] = useState<CollageItem | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<CollageItem | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [stickerSidebarOpen, setStickerSidebarOpen] = useState(false);
@@ -41,6 +42,8 @@ export default function Home() {
   const [isEraseMode, setIsEraseMode] = useState(false);
   const [drawColor, setDrawColor] = useState('#000000');
   const [isTextMode, setIsTextMode] = useState(false);
+  const [selectedTextColor, setSelectedTextColor] = useState('#000000');
+  const [selectedTextFont, setSelectedTextFont] = useState('Arial');
   const canvasDrawRef = useRef<HTMLCanvasElement>(null);
   const isDrawingRef = useRef(false);
   const lastXRef = useRef(0);
@@ -144,7 +147,9 @@ export default function Home() {
         rotation: 0,
         scale: 1,
         content: text,
-        color: '#000000'
+        color: selectedTextColor,
+        fontFamily: selectedTextFont,
+        fontSize: 16
       };
       addCollageItem(newItem);
       setIsTextMode(false);
@@ -321,7 +326,12 @@ export default function Home() {
                 key={item.id}
                 item={item}
                 selected={selectedItem === item.id}
-                onSelect={() => setSelectedItem(item.id)}
+                onSelect={() => {
+                  setSelectedItem(item.id);
+                  if (item.type === 'text') {
+                    setSelectedItemForEditing(item);
+                  }
+                }}
                 onUpdate={(updates) => updateItem(item.id, updates)}
                 onDelete={() => deleteItem(item.id)}
                 onReceiptClick={() => handleReceiptClick(item)}
@@ -471,17 +481,13 @@ export default function Home() {
               {isDrawMode && !isEraseMode && (
                 <div className="draw-option-group">
                   <label>Color</label>
-                  <div className="color-picker">
-                    {['#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF'].map((color) => (
-                      <button
-                        key={color}
-                        className={`color-btn ${drawColor === color ? 'active' : ''}`}
-                        style={{ backgroundColor: color }}
-                        onClick={() => setDrawColor(color)}
-                        title={color}
-                      />
-                    ))}
-                  </div>
+                  <input 
+                    type="color" 
+                    value={drawColor} 
+                    onChange={(e) => setDrawColor(e.target.value)}
+                    style={{ width: '100%', height: '40px', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                    title="Pick a custom color"
+                  />
                 </div>
               )}
 
@@ -502,7 +508,133 @@ export default function Home() {
               </div>
             </div>
           )}
+
+          {isTextMode && (
+            <div className="draw-options">
+              <div className="draw-option-group">
+                <label>Font</label>
+                <select 
+                  value={selectedTextFont}
+                  onChange={(e) => setSelectedTextFont(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    border: '2px solid #e0e0e0',
+                    borderRadius: '6px',
+                    fontSize: '0.9rem',
+                    fontFamily: e.target.value,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="Arial">Arial</option>
+                  <option value="Georgia">Georgia</option>
+                  <option value="Times New Roman">Times New Roman</option>
+                  <option value="Courier New">Courier New</option>
+                  <option value="Verdana">Verdana</option>
+                  <option value="Comic Sans MS">Comic Sans MS</option>
+                  <option value="Impact">Impact</option>
+                </select>
+              </div>
+
+              <div className="draw-option-group">
+                <label>Color</label>
+                <input 
+                  type="color" 
+                  value={selectedTextColor} 
+                  onChange={(e) => setSelectedTextColor(e.target.value)}
+                  style={{ width: '100%', height: '40px', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                  title="Pick a text color"
+                />
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Text Editing Panel */}
+        {selectedItemForEditing && selectedItemForEditing.type === 'text' && (
+          <div style={{
+            position: 'fixed',
+            right: 20,
+            bottom: 20,
+            width: '200px',
+            background: 'white',
+            border: '2px solid #FEDBDD',
+            borderRadius: '12px',
+            padding: '1rem',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            zIndex: 50
+          }}>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontWeight: 600, color: '#333', marginBottom: '0.5rem', fontSize: '0.85rem' }}>Font</label>
+              <select 
+                value={selectedItemForEditing.fontFamily || 'Arial'}
+                onChange={(e) => {
+                  updateItem(selectedItemForEditing.id, { fontFamily: e.target.value });
+                  setSelectedItemForEditing({ ...selectedItemForEditing, fontFamily: e.target.value });
+                }}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  border: '2px solid #e0e0e0',
+                  borderRadius: '6px',
+                  fontSize: '0.9rem',
+                  fontFamily: selectedItemForEditing.fontFamily || 'Arial',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="Arial">Arial</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Courier New">Courier New</option>
+                <option value="Verdana">Verdana</option>
+                <option value="Comic Sans MS">Comic Sans MS</option>
+                <option value="Impact">Impact</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontWeight: 600, color: '#333', marginBottom: '0.5rem', fontSize: '0.85rem' }}>Color</label>
+              <input 
+                type="color" 
+                value={selectedItemForEditing.color || '#000000'} 
+                onChange={(e) => {
+                  updateItem(selectedItemForEditing.id, { color: e.target.value });
+                  setSelectedItemForEditing({ ...selectedItemForEditing, color: e.target.value });
+                }}
+                style={{ width: '100%', height: '40px', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                title="Pick a text color"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Sticker/Shape Editing Panel */}
+        {selectedItemForEditing && (selectedItemForEditing.type === 'smiley' || selectedItemForEditing.type === 'paperclip') && (
+          <div style={{
+            position: 'fixed',
+            right: 20,
+            bottom: 20,
+            width: '200px',
+            background: 'white',
+            border: '2px solid #FEDBDD',
+            borderRadius: '12px',
+            padding: '1rem',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            zIndex: 50
+          }}>
+            <label style={{ display: 'block', fontWeight: 600, color: '#333', marginBottom: '0.5rem', fontSize: '0.85rem' }}>Color</label>
+            <input 
+              type="color" 
+              value={selectedItemForEditing.color || '#000000'} 
+              onChange={(e) => {
+                updateItem(selectedItemForEditing.id, { color: e.target.value });
+                setSelectedItemForEditing({ ...selectedItemForEditing, color: e.target.value });
+              }}
+              style={{ width: '100%', height: '40px', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+              title={`Pick a ${selectedItemForEditing.type} color`}
+            />
+          </div>
+        )}
       </div>
 
       {/* Receipt Details Modal */}
@@ -723,7 +855,7 @@ function CollageItemComponent({ item, selected, onSelect, onUpdate, onDelete, on
       ) : null}
       {item.type === 'image' && <img src={item.content} alt="collage item" draggable={false} />}
       {item.type === 'text' && (
-        <div className="text-item" style={{ color: item.color || '#000000', fontSize: '16px', fontWeight: 'bold' }}>
+        <div className="text-item" style={{ color: item.color || '#000000', fontSize: `${item.fontSize || 16}px`, fontWeight: 'bold', fontFamily: item.fontFamily || 'Arial' }}>
           {item.content}
         </div>
       )}
