@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useStore } from '../store';
-import type { CollageItem } from '../store';
+import type { CollageItem, ReceiptData } from '../store';
+import { analyzeReceipt } from '../services/gemini';
 import '../styles/Home.css';
 import '../styles/CollageEditor.css';
 
@@ -8,36 +9,73 @@ const STICKERS = [
   '😊', '🎉', '🍔', '🎂', '☕', '🍕', '💝', '✨', '🌟', '💫', '🎨', '🎭'
 ];
 
+const CATEGORY_ICONS: Record<string, string> = {
+  'Food & Dining': '🍽️',
+  'Groceries': '🛒',
+  'Shopping': '🛍️',
+  'Entertainment': '🎬',
+  'Transportation': '🚗',
+  'Health': '💊',
+  'Utilities': '💡',
+  'Other': '📦'
+};
+
 export default function Home() {
   const receiptInputRef = useRef<HTMLInputElement>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
-  const { collageItems: items, addCollageItem, updateCollageItem, deleteCollageItem } = useStore();
+  const { collageItems: items, addCollageItem, updateCollageItem, deleteCollageItem, getTotalSpent } = useStore();
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [selectedReceipt, setSelectedReceipt] = useState<CollageItem | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // Count images and receipts
   const imageCount = items.filter(i => i.type === 'image' && !i.id.startsWith('receipt-')).length;
   const receiptCount = items.filter(i => i.id.startsWith('receipt-')).length;
+  const totalSpent = getTotalSpent();
 
-  const handleReceiptUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Calculate spending by category
+  const spendingByCategory = items
+    .filter(item => item.id.startsWith('receipt-') && item.receiptData)
+    .reduce((acc, item) => {
+      const category = item.receiptData?.category || 'Other';
+      acc[category] = (acc[category] || 0) + (item.receiptData?.total || 0);
+      return acc;
+    }, {} as Record<string, number>);
+
+  const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      Array.from(files).forEach(file => {
+      setIsAnalyzing(true);
+      for (const file of Array.from(files)) {
         const reader = new FileReader();
-        reader.onload = (event) => {
+        reader.onload = async (event) => {
+          const imageData = event.target?.result as string;
+          
+          // Add receipt to canvas immediately with loading state
+          const itemId = `receipt-${Date.now()}-${Math.random()}`;
           const newItem: CollageItem = {
-            id: `receipt-${Date.now()}-${Math.random()}`,
+            id: itemId,
             type: 'image',
             x: 100 + Math.random() * 200,
             y: 100 + Math.random() * 150,
             rotation: Math.random() * 10 - 5,
             scale: 0.8,
-            content: event.target?.result as string
+            content: imageData
           };
           addCollageItem(newItem);
+
+          // Analyze with Gemini
+          try {
+            const receiptData = await analyzeReceipt(imageData);
+            updateCollageItem(itemId, { receiptData });
+          } catch (error) {
+            console.error('Error analyzing receipt:', error);
+          }
+          setIsAnalyzing(false);
         };
         reader.readAsDataURL(file);
-      });
+      }
     }
     e.target.value = '';
   };
@@ -84,6 +122,15 @@ export default function Home() {
 
   const deleteItem = (id: string) => {
     deleteCollageItem(id);
+    if (selectedReceipt?.id === id) {
+      setSelectedReceipt(null);
+    }
+  };
+
+  const handleReceiptClick = (item: CollageItem) => {
+    if (item.id.startsWith('receipt-')) {
+      setSelectedReceipt(item);
+    }
   };
 
   return (
@@ -96,14 +143,15 @@ export default function Home() {
 
         <div className="upload-cards-container">
           <div className="upload-card">
-            <img src="/button.png" alt="Upload Receipt" className="upload-icon-image" />
-            <h3>Upload Receipt ({receiptCount})</h3>
-            <p>Drag & drop or click to upload receipt photos</p>
+            <div className="upload-icon">📄</div>
+            <h3>Upload Receipt</h3>
+            <p>AI will analyze your receipt automatically</p>
             <button 
+              className="choose-btn choose-btn-dark"
               onClick={() => receiptInputRef.current?.click()}
-              className="receipt-upload-btn"
+              disabled={isAnalyzing}
             >
-              <img src="/receipt.png" alt="Choose Receipt" className="receipt-btn-icon" />
+              {isAnalyzing ? '🔄 Analyzing...' : 'Choose Receipt'}
             </button>
             <input
               ref={receiptInputRef}
@@ -116,8 +164,8 @@ export default function Home() {
           </div>
 
           <div className="upload-card">
-            <img src="/photo.png" alt="Add Photos" className="upload-icon-image" />
-            <h3>Add Photos ({imageCount})</h3>
+            <div className="upload-icon">🖼</div>
+            <h3>Add Photos</h3>
             <p>Upload any photos to include in your memory collage</p>
             <button 
               className="choose-btn choose-btn-light"
@@ -136,7 +184,7 @@ export default function Home() {
           </div>
 
           <div className="upload-card">
-            <img src="/stickers.png" alt="Add Stickers" className="upload-icon-image" />
+            <div className="upload-icon">✨</div>
             <h3>Add Stickers</h3>
             <p>Decorate your collage with fun stickers</p>
             <div className="sticker-grid">
@@ -152,12 +200,44 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* Budget Summary */}
+        {Object.keys(spendingByCategory).length > 0 && (
+          <div className="budget-summary">
+            <h4>📊 Spending by Category</h4>
+            <div className="category-bars">
+              {Object.entries(spendingByCategory).map(([category, amount]) => (
+                <div key={category} className="category-bar">
+                  <span className="category-label">
+                    {CATEGORY_ICONS[category] || '📦'} {category}
+                  </span>
+                  <div className="bar-container">
+                    <div 
+                      className="bar-fill" 
+                      style={{ width: `${Math.min((amount / totalSpent) * 100, 100)}%` }}
+                    />
+                  </div>
+                  <span className="category-amount">${amount.toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Canvas Section */}
       <div className="canvas-section">
         <h3 className="canvas-title">✦ Your Memory Collage</h3>
-        <div ref={canvasRef} className="canvas">
+        <div 
+          ref={canvasRef} 
+          className="canvas"
+          onClick={(e) => {
+            // Deselect when clicking on canvas background (not on items)
+            if (e.target === e.currentTarget) {
+              setSelectedItem(null);
+            }
+          }}
+        >
           {items.filter(i => !['paperclip', 'smiley'].includes(i.type)).length === 0 && (
             <div className="empty-state">
               <div className="empty-icon">✦</div>
@@ -174,10 +254,52 @@ export default function Home() {
               onSelect={() => setSelectedItem(item.id)}
               onUpdate={(updates) => updateItem(item.id, updates)}
               onDelete={() => deleteItem(item.id)}
+              onReceiptClick={() => handleReceiptClick(item)}
             />
           ))}
         </div>
       </div>
+
+      {/* Receipt Details Modal */}
+      {selectedReceipt && selectedReceipt.receiptData && (
+        <div className="receipt-modal-overlay" onClick={() => setSelectedReceipt(null)}>
+          <div className="receipt-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setSelectedReceipt(null)}>×</button>
+            <div className="receipt-modal-content">
+              <div className="receipt-preview">
+                <img src={selectedReceipt.content} alt="Receipt" />
+              </div>
+              <div className="receipt-details">
+                <h3>{CATEGORY_ICONS[selectedReceipt.receiptData.category]} {selectedReceipt.receiptData.merchant}</h3>
+                <div className="receipt-meta">
+                  <span className="receipt-date">📅 {selectedReceipt.receiptData.date}</span>
+                  <span className="receipt-category">{selectedReceipt.receiptData.category}</span>
+                </div>
+                <div className="receipt-total">
+                  <span>Total</span>
+                  <span className="total-amount">${selectedReceipt.receiptData.total.toFixed(2)}</span>
+                </div>
+                {selectedReceipt.receiptData.items.length > 0 && (
+                  <div className="receipt-items">
+                    <h4>Items</h4>
+                    <ul>
+                      {selectedReceipt.receiptData.items.map((item, idx) => (
+                        <li key={idx}>
+                          <span>{item.name}</span>
+                          <span>${item.price.toFixed(2)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <div className="budget-tip">
+                  💡 This purchase is {((selectedReceipt.receiptData.total / totalSpent) * 100).toFixed(1)}% of your total spending
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -188,19 +310,25 @@ interface CollageItemProps {
   onSelect: () => void;
   onUpdate: (updates: Partial<CollageItem>) => void;
   onDelete: () => void;
+  onReceiptClick: () => void;
 }
 
-function CollageItemComponent({ item, selected, onSelect, onUpdate, onDelete }: CollageItemProps) {
+function CollageItemComponent({ item, selected, onSelect, onUpdate, onDelete, onReceiptClick }: CollageItemProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [isRotating, setIsRotating] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [initialScale, setInitialScale] = useState(1);
+  const [initialRotation, setInitialRotation] = useState(0);
   const [initialMousePos, setInitialMousePos] = useState({ x: 0, y: 0 });
+  const itemRef = useRef<HTMLDivElement>(null);
+  const clickStartTime = useRef(0);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (isResizing) return;
+    if (isResizing || isRotating) return;
     e.preventDefault();
     onSelect();
+    clickStartTime.current = Date.now();
     setIsDragging(true);
     const rect = (e.target as HTMLElement).getBoundingClientRect();
     setDragOffset({
@@ -209,12 +337,29 @@ function CollageItemComponent({ item, selected, onSelect, onUpdate, onDelete }: 
     });
   };
 
+  const handleMouseUp = () => {
+    const clickDuration = Date.now() - clickStartTime.current;
+    // If it was a quick click (not a drag), open receipt details
+    if (clickDuration < 200 && item.id.startsWith('receipt-')) {
+      onReceiptClick();
+    }
+  };
+
   const handleResizeStart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     onSelect();
     setIsResizing(true);
     setInitialScale(item.scale);
+    setInitialMousePos({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleRotateStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onSelect();
+    setIsRotating(true);
+    setInitialRotation(item.rotation);
     setInitialMousePos({ x: e.clientX, y: e.clientY });
   };
 
@@ -229,7 +374,10 @@ function CollageItemComponent({ item, selected, onSelect, onUpdate, onDelete }: 
           y: e.clientY - canvasRect.top - dragOffset.y
         });
       };
-      const handleGlobalMouseUp = () => setIsDragging(false);
+      const handleGlobalMouseUp = () => {
+        handleMouseUp();
+        setIsDragging(false);
+      };
       
       window.addEventListener('mousemove', handleGlobalMouseMove);
       window.addEventListener('mouseup', handleGlobalMouseUp);
@@ -260,17 +408,50 @@ function CollageItemComponent({ item, selected, onSelect, onUpdate, onDelete }: 
     }
   }, [isResizing, initialScale, initialMousePos, onUpdate]);
 
+  React.useEffect(() => {
+    if (isRotating && itemRef.current) {
+      const handleGlobalMouseMove = (e: MouseEvent) => {
+        const rect = itemRef.current!.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        // Calculate angle from center to mouse
+        const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+        const initialAngle = Math.atan2(initialMousePos.y - centerY, initialMousePos.x - centerX) * (180 / Math.PI);
+        
+        const newRotation = initialRotation + (angle - initialAngle);
+        onUpdate({ rotation: newRotation });
+      };
+      const handleGlobalMouseUp = () => setIsRotating(false);
+      
+      window.addEventListener('mousemove', handleGlobalMouseMove);
+      window.addEventListener('mouseup', handleGlobalMouseUp);
+      return () => {
+        window.removeEventListener('mousemove', handleGlobalMouseMove);
+        window.removeEventListener('mouseup', handleGlobalMouseUp);
+      };
+    }
+  }, [isRotating, initialRotation, initialMousePos, onUpdate]);
+
+  const isReceipt = item.id.startsWith('receipt-');
+
   return (
     <div
-      className={`collage-item ${selected ? 'selected' : ''} ${item.type === 'paperclip' ? 'paperclip-item' : ''} ${item.type === 'smiley' ? 'smiley-item' : ''}`}
+      ref={itemRef}
+      className={`collage-item ${selected ? 'selected' : ''} ${item.type === 'paperclip' ? 'paperclip-item' : ''} ${item.type === 'smiley' ? 'smiley-item' : ''} ${isReceipt ? 'receipt-item' : ''}`}
       style={{
         left: `${item.x}px`,
         top: `${item.y}px`,
         transform: `rotate(${item.rotation}deg) scale(${item.scale})`,
-        cursor: isResizing ? 'nwse-resize' : isDragging ? 'grabbing' : 'grab'
+        cursor: isRotating ? 'grabbing' : isResizing ? 'nwse-resize' : isDragging ? 'grabbing' : isReceipt ? 'pointer' : 'grab'
       }}
       onMouseDown={handleMouseDown}
     >
+      {isReceipt && item.receiptData && (
+        <div className="receipt-badge">
+          ${item.receiptData.total.toFixed(2)}
+        </div>
+      )}
       <button 
         className="delete-btn" 
         onClick={(e) => { e.stopPropagation(); onDelete(); }}
@@ -278,6 +459,13 @@ function CollageItemComponent({ item, selected, onSelect, onUpdate, onDelete }: 
       >
         ×
       </button>
+      <div 
+        className="rotate-handle"
+        onMouseDown={handleRotateStart}
+        title="Rotate"
+      >
+        ↻
+      </div>
       <div 
         className="resize-handle"
         onMouseDown={handleResizeStart}

@@ -14,6 +14,14 @@ export interface Memory {
   notes: string;
 }
 
+export interface ReceiptData {
+  total: number;
+  merchant: string;
+  date: string;
+  category: string;
+  items: Array<{ name: string; price: number }>;
+}
+
 export interface CollageItem {
   id: string;
   type: 'sticker' | 'image' | 'text' | 'paperclip' | 'smiley';
@@ -23,6 +31,7 @@ export interface CollageItem {
   scale: number;
   content: string;
   color?: string;
+  receiptData?: ReceiptData;
 }
 
 interface Store {
@@ -35,6 +44,7 @@ interface Store {
   updateCollageItem: (id: string, updates: Partial<CollageItem>) => void;
   deleteCollageItem: (id: string) => void;
   setCollageItems: (items: CollageItem[]) => void;
+  getTotalSpent: () => number;
 }
 
 // Initial decorative items
@@ -47,7 +57,7 @@ const INITIAL_DECORATIONS: CollageItem[] = [
   { id: 'clip-3', type: 'paperclip', x: 60, y: 180, rotation: 5, scale: 1, content: '', color: '#ffd93d' },
 ];
 
-export const useStore = create<Store>((set) => ({
+export const useStore = create<Store>((set, get) => ({
   memories: [],
   collageItems: INITIAL_DECORATIONS,
   addMemory: (memory) => set((state) => ({ 
@@ -68,5 +78,11 @@ export const useStore = create<Store>((set) => ({
   deleteCollageItem: (id) => set((state) => ({
     collageItems: state.collageItems.filter(item => item.id !== id)
   })),
-  setCollageItems: (items) => set({ collageItems: items })
+  setCollageItems: (items) => set({ collageItems: items }),
+  getTotalSpent: () => {
+    const items = get().collageItems;
+    return items
+      .filter(item => item.id.startsWith('receipt-') && item.receiptData)
+      .reduce((sum, item) => sum + (item.receiptData?.total || 0), 0);
+  }
 }));
