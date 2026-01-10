@@ -6,7 +6,8 @@ import '../styles/Home.css';
 import '../styles/CollageEditor.css';
 
 const STICKERS = [
-  '😊', '🎉', '🍔', '🎂', '☕', '🍕', '💝', '✨', '🌟', '💫', '🎨', '🎭'
+  '😊', '🎉', '🍔', '🎂', '☕', '🍕', '💝', '✨', '🌟',
+  '💫', '🎨', '🎭'
 ];
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -28,13 +29,10 @@ export default function Home() {
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<CollageItem | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-<<<<<<< HEAD
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<'stickers' | 'photos'>('stickers');
   const [photoSidebarOpen, setPhotoSidebarOpen] = useState(false);
   const [drawSidebarOpen, setDrawSidebarOpen] = useState(false);
-=======
->>>>>>> main
 
   // Count images and receipts
   const imageCount = items.filter(i => i.type === 'image' && !i.id.startsWith('receipt-')).length;
@@ -58,7 +56,7 @@ export default function Home() {
         const reader = new FileReader();
         reader.onload = async (event) => {
           const imageData = event.target?.result as string;
-          
+
           // Add receipt to canvas immediately with loading state
           const itemId = `receipt-${Date.now()}-${Math.random()}`;
           const newItem: CollageItem = {
@@ -110,593 +108,349 @@ export default function Home() {
     e.target.value = '';
   };
 
-  const addSticker = (emoji: string) => {
+  const handleAddSticker = (emoji: string) => {
     const newItem: CollageItem = {
-      id: `sticker-${Date.now()}`,
+      id: `sticker-${Date.now()}-${Math.random()}`,
       type: 'sticker',
-      x: 50 + Math.random() * 100,
-      y: 50 + Math.random() * 100,
-      rotation: 0,
+      x: 200 + Math.random() * 150,
+      y: 200 + Math.random() * 150,
+      rotation: Math.random() * 360,
       scale: 1,
       content: emoji
     };
     addCollageItem(newItem);
   };
 
-  const updateItem = (id: string, updates: Partial<CollageItem>) => {
-    updateCollageItem(id, updates);
+  const handleItemDrag = (id: string, newX: number, newY: number) => {
+    updateCollageItem(id, { x: newX, y: newY });
   };
 
-  const deleteItem = (id: string) => {
+  const handleItemScale = (id: string, newScale: number) => {
+    updateCollageItem(id, { scale: Math.max(0.3, Math.min(3, newScale)) });
+  };
+
+  const handleItemRotate = (id: string, newRotation: number) => {
+    updateCollageItem(id, { rotation: newRotation });
+  };
+
+  const handleDeleteItem = (id: string) => {
     deleteCollageItem(id);
-    if (selectedReceipt?.id === id) {
-      setSelectedReceipt(null);
-    }
-  };
-
-  const handleReceiptClick = (item: CollageItem) => {
-    if (item.id.startsWith('receipt-')) {
-      setSelectedReceipt(item);
-    }
+    setSelectedItem(null);
   };
 
   return (
-    <div className="home">
-      <div className="home-container">
-        <div className="home-header">
-          <h2>Capture Your Moments</h2>
-          <p>Upload receipts and photos to create your memory collage</p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-pink-50 p-4">
+      {/* Header */}
+      <div className="max-w-7xl mx-auto mb-6">
+        <h1 className="text-4xl font-bold text-gray-800 mb-2">Memory Collage</h1>
+        <p className="text-gray-600">Capture receipts and create your memories</p>
+      </div>
 
-        <div className="upload-cards-container">
-          <div className="upload-card">
-<<<<<<< HEAD
-=======
-            <div className="upload-icon">📄</div>
-            <h3>Upload Receipt</h3>
-            <p>AI will analyze your receipt automatically</p>
->>>>>>> main
-            <button 
-              className="choose-btn choose-btn-dark"
-              onClick={() => receiptInputRef.current?.click()}
-              disabled={isAnalyzing}
-            >
-<<<<<<< HEAD
-              <img src="/button.png" alt="Upload Receipt" className="receipt-btn-icon" />
-=======
-              {isAnalyzing ? '🔄 Analyzing...' : 'Choose Receipt'}
->>>>>>> main
-            </button>
-            <h3>Upload Receipt ({receiptCount})</h3>
-            <p>Drag & drop or click to upload receipt photos</p>
-            <input
-              ref={receiptInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleReceiptUpload}
-              hidden
-            />
-          </div>
-
-          <div className="upload-card">
-<<<<<<< HEAD
-            <button 
-              onClick={() => photoInputRef.current?.click()}
-              className="photo-upload-btn"
-            >
-              <img src="/photo.png" alt="Add Photos" className="photo-btn-icon" />
-            </button>
-            <h3>Add Photos ({imageCount})</h3>
-=======
-            <div className="upload-icon">🖼</div>
-            <h3>Add Photos</h3>
->>>>>>> main
-            <p>Upload any photos to include in your memory collage</p>
-            <input
-              ref={photoInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handlePhotoUpload}
-              hidden
-            />
-          </div>
-        </div>
-
-<<<<<<< HEAD
-        {/* Budget Summary */}
-        {Object.keys(spendingByCategory).length > 0 && (
-          <div className="budget-summary">
-            <h4>📊 Spending by Category</h4>
-            <div className="category-bars">
-              {Object.entries(spendingByCategory).map(([category, amount]) => (
-                <div key={category} className="category-bar">
-                  <span className="category-label">
-                    {CATEGORY_ICONS[category] || '📦'} {category}
-                  </span>
-                  <div className="bar-container">
-                    <div 
-                      className="bar-fill" 
-                      style={{ width: `${Math.min((amount / totalSpent) * 100, 100)}%` }}
-                    />
-                  </div>
-                  <span className="category-amount">${amount.toFixed(2)}</span>
+      {/* Main Layout */}
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Stats and Controls - Left Sidebar */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Quick Stats */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">Your Memories</h2>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Photos</span>
+                  <span className="text-2xl font-bold text-pink-500">{imageCount}</span>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Canvas Section with Stickers Sidebar */}
-      <div className="canvas-wrapper">
-        <div className="canvas-section">
-          <h3 className="canvas-title">✦ Your Memory Collage</h3>
-          <div 
-            ref={canvasRef} 
-            className="canvas"
-            onClick={(e) => {
-              // Deselect when clicking on canvas background (not on items)
-              if (e.target === e.currentTarget) {
-                setSelectedItem(null);
-              }
-            }}
-          >
-=======
-          <div className="upload-card">
-            <div className="upload-icon">✨</div>
-            <h3>Add Stickers</h3>
-            <p>Decorate your collage with fun stickers</p>
-            <div className="sticker-grid">
-              {STICKERS.slice(0, 6).map((emoji) => (
-                <button 
-                  key={emoji} 
-                  className="sticker-btn-small"
-                  onClick={() => addSticker(emoji)}
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Budget Summary */}
-        {Object.keys(spendingByCategory).length > 0 && (
-          <div className="budget-summary">
-            <h4>📊 Spending by Category</h4>
-            <div className="category-bars">
-              {Object.entries(spendingByCategory).map(([category, amount]) => (
-                <div key={category} className="category-bar">
-                  <span className="category-label">
-                    {CATEGORY_ICONS[category] || '📦'} {category}
-                  </span>
-                  <div className="bar-container">
-                    <div 
-                      className="bar-fill" 
-                      style={{ width: `${Math.min((amount / totalSpent) * 100, 100)}%` }}
-                    />
-                  </div>
-                  <span className="category-amount">${amount.toFixed(2)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Canvas Section */}
-      <div className="canvas-section">
-        <h3 className="canvas-title">✦ Your Memory Collage</h3>
-        <div 
-          ref={canvasRef} 
-          className="canvas"
-          onClick={(e) => {
-            // Deselect when clicking on canvas background (not on items)
-            if (e.target === e.currentTarget) {
-              setSelectedItem(null);
-            }
-          }}
-        >
->>>>>>> main
-          {items.filter(i => !['paperclip', 'smiley'].includes(i.type)).length === 0 && (
-            <div className="empty-state">
-              <div className="empty-icon">✦</div>
-              <h2>Your Canvas is Empty</h2>
-              <p>Start creating your memory collage by adding receipts, photos, and stickers above</p>
-            </div>
-          )}
-          
-          {items.map((item) => (
-            <CollageItemComponent
-              key={item.id}
-              item={item}
-              selected={selectedItem === item.id}
-              onSelect={() => setSelectedItem(item.id)}
-              onUpdate={(updates) => updateItem(item.id, updates)}
-              onDelete={() => deleteItem(item.id)}
-              onReceiptClick={() => handleReceiptClick(item)}
-            />
-          ))}
-        </div>
-      </div>
-
-<<<<<<< HEAD
-      {/* Collapsible Sidebar */}
-      <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-        <button 
-          className="sidebar-toggle"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-        >
-          <img src="/stickers.png" alt="Stickers" className="sidebar-toggle-icon" />
-        </button>
-        
-        {sidebarOpen && (
-          <div className="sidebar-content">
-            <div className="sidebar-tabs">
-              <button 
-                className={`tab-btn ${sidebarTab === 'stickers' ? 'active' : ''}`}
-                onClick={() => setSidebarTab('stickers')}
-              >
-                Stickers
-              </button>
-              <button 
-                className={`tab-btn ${sidebarTab === 'photos' ? 'active' : ''}`}
-                onClick={() => setSidebarTab('photos')}
-              >
-                Photos
-              </button>
-            </div>
-
-            {sidebarTab === 'stickers' && (
-              <div className="sidebar-section">
-                <div className="stickers-grid">
-                  {STICKERS.map((emoji) => (
-                    <button 
-                      key={emoji} 
-                      className="sticker-btn"
-                      onClick={() => addSticker(emoji)}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Receipts</span>
+                  <span className="text-2xl font-bold text-pink-500">{receiptCount}</span>
                 </div>
               </div>
-            )}
+            </div>
 
-            {sidebarTab === 'photos' && (
-              <div className="sidebar-section">
-                <h4>Uploaded Photos</h4>
-                {items.filter(i => i.type === 'image' && i.id.startsWith('photo-')).length === 0 ? (
-                  <p className="empty-message">No photos uploaded yet. Upload photos from the section above!</p>
-                ) : (
-                  <div className="photos-grid">
-                    {items.filter(i => i.type === 'image' && i.id.startsWith('photo-')).map((item) => (
-                      <div key={item.id} className="photo-thumbnail">
-                        <img src={item.content} alt="Uploaded" />
-                        <button 
-                          className="add-photo-btn"
-                          onClick={() => {
-                            addCollageItem({
-                              id: `photo-copy-${Date.now()}`,
-                              type: 'image',
-                              x: 150 + Math.random() * 200,
-                              y: 120 + Math.random() * 150,
-                              rotation: Math.random() * 10 - 5,
-                              scale: 0.8,
-                              content: item.content
-                            });
-                          }}
-                        >
-                          +
-                        </button>
+            {/* Upload Buttons */}
+            <div className="space-y-3">
+              <button
+                onClick={() => receiptInputRef.current?.click()}
+                className="w-full bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-md"
+              >
+                📸 Upload Receipt
+              </button>
+              <button
+                onClick={() => photoInputRef.current?.click()}
+                className="w-full bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-md"
+              >
+                🖼️ Add Photos
+              </button>
+            </div>
+
+            {/* Budget Summary */}
+            {Object.keys(spendingByCategory).length > 0 && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Spending by Category</h3>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {Object.entries(spendingByCategory)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([category, amount]) => (
+                      <div key={category} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+                        <span className="text-sm text-gray-600">
+                          {CATEGORY_ICONS[category]} {category}
+                        </span>
+                        <span className="font-semibold text-gray-800">
+                          ${amount.toFixed(2)}
+                        </span>
                       </div>
                     ))}
+                </div>
+                <div className="mt-4 pt-4 border-t border-pink-200">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold text-gray-800">Total Spent</span>
+                    <span className="text-2xl font-bold text-pink-500">${totalSpent.toFixed(2)}</span>
                   </div>
-                )}
+                </div>
               </div>
             )}
           </div>
-        )}
-      </div>
 
-      {/* Photo Sidebar */}
-      <div className={`sidebar photo-sidebar ${photoSidebarOpen ? 'open' : ''}`}>
-        <button 
-          className="sidebar-toggle photo-toggle"
-          onClick={() => setPhotoSidebarOpen(!photoSidebarOpen)}
-        >
-          <img src="/photo.png" alt="Photos" className="sidebar-toggle-icon" />
-        </button>
-        
-        {photoSidebarOpen && (
-          <div className="sidebar-content">
-            <div className="sidebar-section">
-              <h4>Uploaded Photos</h4>
-              {items.filter(i => i.type === 'image' && i.id.startsWith('photo-')).length === 0 ? (
-                <p className="empty-message">No photos uploaded yet. Upload photos from the section above!</p>
-              ) : (
-                <div className="photos-grid">
-                  {items.filter(i => i.type === 'image' && i.id.startsWith('photo-')).map((item) => (
-                    <div key={item.id} className="photo-thumbnail">
-                      <img src={item.content} alt="Uploaded" />
-                      <button 
-                        className="add-photo-btn"
-                        onClick={() => {
-                          addCollageItem({
-                            id: `photo-copy-${Date.now()}`,
-                            type: 'image',
-                            x: 150 + Math.random() * 200,
-                            y: 120 + Math.random() * 150,
-                            rotation: Math.random() * 10 - 5,
-                            scale: 0.8,
-                            content: item.content
-                          });
-                        }}
-                      >
-                        +
-                      </button>
-                    </div>
-                  ))}
+          {/* Canvas Area - Main Content */}
+          <div className="lg:col-span-3 relative">
+            {/* Canvas Container */}
+            <div
+              ref={canvasRef}
+              className="canvas-wrapper relative bg-white rounded-lg shadow-lg overflow-hidden"
+              style={{
+                height: '600px',
+                position: 'relative'
+              }}
+            >
+              {items.length === 0 ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-gray-400 text-lg mb-4">Your collage is empty</p>
+                    <p className="text-gray-300 text-sm">Upload receipts and photos to get started!</p>
+                  </div>
                 </div>
+              ) : (
+                items.map(item => {
+                  const isSticker = item.type === 'sticker';
+                  const isSelected = selectedItem === item.id;
+
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => setSelectedItem(item.id)}
+                      className={`absolute cursor-move select-none transition-all ${
+                        isSelected ? 'ring-2 ring-pink-500' : ''
+                      }`}
+                      style={{
+                        left: `${item.x}px`,
+                        top: `${item.y}px`,
+                        transform: `rotate(${item.rotation}deg) scale(${item.scale})`,
+                        zIndex: isSelected ? 100 : 10
+                      }}
+                    >
+                      {isSticker ? (
+                        <div
+                          className="text-4xl cursor-grab active:cursor-grabbing"
+                          draggable
+                          onDragStart={(e) => {
+                            const startX = e.clientX - item.x;
+                            const startY = e.clientY - item.y;
+                            e.dataTransfer.effectAllowed = 'move';
+                          }}
+                          onDragEnd={(e) => {
+                            const newX = e.clientX - (canvasRef.current?.getBoundingClientRect().left || 0);
+                            const newY = e.clientY - (canvasRef.current?.getBoundingClientRect().top || 0);
+                            handleItemDrag(item.id, newX, newY);
+                          }}
+                        >
+                          {item.content}
+                        </div>
+                      ) : (
+                        <div className="relative">
+                          <img
+                            src={item.content}
+                            alt={item.id}
+                            className="object-cover rounded-lg shadow-md max-w-xs cursor-grab active:cursor-grabbing"
+                            style={{
+                              width: '120px',
+                              height: '120px'
+                            }}
+                            draggable
+                            onDragEnd={(e) => {
+                              const newX = e.clientX - (canvasRef.current?.getBoundingClientRect().left || 0);
+                              const newY = e.clientY - (canvasRef.current?.getBoundingClientRect().top || 0);
+                              handleItemDrag(item.id, newX, newY);
+                            }}
+                          />
+                          {item.receiptData && (
+                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 text-center rounded-b-lg">
+                              ${item.receiptData.total?.toFixed(2)}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </div>
-          </div>
-        )}
-      </div>
 
-      {/* Draw & Text Sidebar */}
-      <div className={`sidebar draw-sidebar ${drawSidebarOpen ? 'open' : ''}`}>
-        <button 
-          className="sidebar-toggle draw-toggle"
-          onClick={() => setDrawSidebarOpen(!drawSidebarOpen)}
-        >
-          <span className="draw-icon">✏️</span>
-        </button>
-        
-        {drawSidebarOpen && (
-          <div className="sidebar-content">
-            <div className="sidebar-section">
-              <h4>Draw & Text</h4>
-              <p className="sidebar-label">Add drawings and text to your collage</p>
-              <div className="draw-tools">
-                <button className="draw-tool-btn">
-                  <span>✏️</span>
-                  <span>Draw</span>
-                </button>
-                <button className="draw-tool-btn">
-                  <span>📝</span>
-                  <span>Text</span>
-                </button>
-              </div>
+            {/* Sidebar Toggles - Positioned on Right */}
+            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex flex-col gap-3 z-50">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="bg-pink-500 hover:bg-pink-600 text-white p-2 rounded-full shadow-lg transition-all"
+                title="Toggle Stickers & Photos"
+              >
+                ✨
+              </button>
+              <button
+                onClick={() => setPhotoSidebarOpen(!photoSidebarOpen)}
+                className="bg-pink-500 hover:bg-pink-600 text-white p-2 rounded-full shadow-lg transition-all"
+                title="Photo Library"
+              >
+                🖼️
+              </button>
+              <button
+                onClick={() => setDrawSidebarOpen(!drawSidebarOpen)}
+                className="bg-pink-500 hover:bg-pink-600 text-white p-2 rounded-full shadow-lg transition-all"
+                title="Drawing Tools"
+              >
+                ✏️
+              </button>
             </div>
-          </div>
-        )}
-      </div>
-      </div>
 
-=======
->>>>>>> main
-      {/* Receipt Details Modal */}
-      {selectedReceipt && selectedReceipt.receiptData && (
-        <div className="receipt-modal-overlay" onClick={() => setSelectedReceipt(null)}>
-          <div className="receipt-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedReceipt(null)}>×</button>
-            <div className="receipt-modal-content">
-              <div className="receipt-preview">
-                <img src={selectedReceipt.content} alt="Receipt" />
-              </div>
-              <div className="receipt-details">
-                <h3>{CATEGORY_ICONS[selectedReceipt.receiptData.category]} {selectedReceipt.receiptData.merchant}</h3>
-                <div className="receipt-meta">
-                  <span className="receipt-date">📅 {selectedReceipt.receiptData.date}</span>
-                  <span className="receipt-category">{selectedReceipt.receiptData.category}</span>
-                </div>
-                <div className="receipt-total">
-                  <span>Total</span>
-                  <span className="total-amount">${selectedReceipt.receiptData.total.toFixed(2)}</span>
-                </div>
-                {selectedReceipt.receiptData.items.length > 0 && (
-                  <div className="receipt-items">
-                    <h4>Items</h4>
-                    <ul>
-                      {selectedReceipt.receiptData.items.map((item, idx) => (
-                        <li key={idx}>
-                          <span>{item.name}</span>
-                          <span>${item.price.toFixed(2)}</span>
-                        </li>
-                      ))}
-                    </ul>
+            {/* Stickers & Photos Sidebar */}
+            {sidebarOpen && (
+              <div className="sidebar-panel absolute right-0 top-0 bottom-0 w-64 bg-white shadow-lg rounded-l-lg border-l border-pink-200 z-40 overflow-y-auto">
+                <div className="p-4 border-b border-pink-200">
+                  <h3 className="font-semibold text-gray-800 mb-3">Add to Collage</h3>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setSidebarTab('stickers')}
+                      className={`flex-1 py-2 px-3 rounded text-sm font-medium transition-all ${
+                        sidebarTab === 'stickers'
+                          ? 'bg-pink-500 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Stickers
+                    </button>
+                    <button
+                      onClick={() => setSidebarTab('photos')}
+                      className={`flex-1 py-2 px-3 rounded text-sm font-medium transition-all ${
+                        sidebarTab === 'photos'
+                          ? 'bg-pink-500 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Photos
+                    </button>
                   </div>
-                )}
-                <div className="budget-tip">
-                  💡 This purchase is {((selectedReceipt.receiptData.total / totalSpent) * 100).toFixed(1)}% of your total spending
+                </div>
+
+                <div className="p-4">
+                  {sidebarTab === 'stickers' && (
+                    <div className="sticker-grid grid grid-cols-4 gap-2">
+                      {STICKERS.map((emoji, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleAddSticker(emoji)}
+                          className="text-3xl hover:scale-110 transition-transform active:scale-95"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {sidebarTab === 'photos' && (
+                    <div>
+                      <p className="text-sm text-gray-600 mb-3">Recently added photos</p>
+                      <div className="photo-grid grid grid-cols-2 gap-2">
+                        {items
+                          .filter(item => item.type === 'image' && item.id.startsWith('photo-'))
+                          .slice(-8)
+                          .map(item => (
+                            <img
+                              key={item.id}
+                              src={item.content}
+                              alt={item.id}
+                              className="w-full h-20 object-cover rounded cursor-pointer hover:opacity-75 transition-opacity"
+                              onClick={() => {
+                                setSelectedItem(item.id);
+                                setSidebarOpen(false);
+                              }}
+                            />
+                          ))}
+                      </div>
+                      <button
+                        onClick={() => photoInputRef.current?.click()}
+                        className="w-full mt-3 bg-pink-100 hover:bg-pink-200 text-pink-700 font-medium py-2 rounded text-sm transition-colors"
+                      >
+                        Upload More Photos
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Photo Sidebar */}
+            {photoSidebarOpen && (
+              <div className="sidebar-panel absolute right-0 top-0 bottom-0 w-64 bg-white shadow-lg rounded-l-lg border-l border-pink-200 z-40 overflow-y-auto">
+                <div className="p-4 border-b border-pink-200">
+                  <h3 className="font-semibold text-gray-800">Photo Library</h3>
+                </div>
+                <div className="p-4">
+                  <p className="text-sm text-gray-600 text-center py-8">
+                    Your photo library will appear here
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Draw Sidebar */}
+            {drawSidebarOpen && (
+              <div className="sidebar-panel absolute right-0 top-0 bottom-0 w-64 bg-white shadow-lg rounded-l-lg border-l border-pink-200 z-40 overflow-y-auto">
+                <div className="p-4 border-b border-pink-200">
+                  <h3 className="font-semibold text-gray-800">Drawing Tools</h3>
+                </div>
+                <div className="p-4">
+                  <p className="text-sm text-gray-600 text-center py-8">
+                    Drawing tools coming soon!
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      )}
-    </div>
-  );
-}
-
-interface CollageItemProps {
-  item: CollageItem;
-  selected: boolean;
-  onSelect: () => void;
-  onUpdate: (updates: Partial<CollageItem>) => void;
-  onDelete: () => void;
-  onReceiptClick: () => void;
-}
-
-function CollageItemComponent({ item, selected, onSelect, onUpdate, onDelete, onReceiptClick }: CollageItemProps) {
-  const [isDragging, setIsDragging] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
-  const [isRotating, setIsRotating] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [initialScale, setInitialScale] = useState(1);
-  const [initialRotation, setInitialRotation] = useState(0);
-  const [initialMousePos, setInitialMousePos] = useState({ x: 0, y: 0 });
-  const itemRef = useRef<HTMLDivElement>(null);
-  const clickStartTime = useRef(0);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (isResizing || isRotating) return;
-    e.preventDefault();
-    onSelect();
-    clickStartTime.current = Date.now();
-    setIsDragging(true);
-    const rect = (e.target as HTMLElement).getBoundingClientRect();
-    setDragOffset({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    });
-  };
-
-  const handleMouseUp = () => {
-    const clickDuration = Date.now() - clickStartTime.current;
-    // If it was a quick click (not a drag), open receipt details
-    if (clickDuration < 200 && item.id.startsWith('receipt-')) {
-      onReceiptClick();
-    }
-  };
-
-  const handleResizeStart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onSelect();
-    setIsResizing(true);
-    setInitialScale(item.scale);
-    setInitialMousePos({ x: e.clientX, y: e.clientY });
-  };
-
-  const handleRotateStart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onSelect();
-    setIsRotating(true);
-    setInitialRotation(item.rotation);
-    setInitialMousePos({ x: e.clientX, y: e.clientY });
-  };
-
-  React.useEffect(() => {
-    if (isDragging) {
-      const handleGlobalMouseMove = (e: MouseEvent) => {
-        const canvas = document.querySelector('.canvas');
-        if (!canvas) return;
-        const canvasRect = canvas.getBoundingClientRect();
-        onUpdate({
-          x: e.clientX - canvasRect.left - dragOffset.x,
-          y: e.clientY - canvasRect.top - dragOffset.y
-        });
-      };
-      const handleGlobalMouseUp = () => {
-        handleMouseUp();
-        setIsDragging(false);
-      };
-      
-      window.addEventListener('mousemove', handleGlobalMouseMove);
-      window.addEventListener('mouseup', handleGlobalMouseUp);
-      return () => {
-        window.removeEventListener('mousemove', handleGlobalMouseMove);
-        window.removeEventListener('mouseup', handleGlobalMouseUp);
-      };
-    }
-  }, [isDragging, dragOffset, onUpdate]);
-
-  React.useEffect(() => {
-    if (isResizing) {
-      const handleGlobalMouseMove = (e: MouseEvent) => {
-        const deltaX = e.clientX - initialMousePos.x;
-        const deltaY = e.clientY - initialMousePos.y;
-        const delta = (deltaX + deltaY) / 2;
-        const newScale = Math.max(0.2, Math.min(3, initialScale + delta / 100));
-        onUpdate({ scale: newScale });
-      };
-      const handleGlobalMouseUp = () => setIsResizing(false);
-      
-      window.addEventListener('mousemove', handleGlobalMouseMove);
-      window.addEventListener('mouseup', handleGlobalMouseUp);
-      return () => {
-        window.removeEventListener('mousemove', handleGlobalMouseMove);
-        window.removeEventListener('mouseup', handleGlobalMouseUp);
-      };
-    }
-  }, [isResizing, initialScale, initialMousePos, onUpdate]);
-
-  React.useEffect(() => {
-    if (isRotating && itemRef.current) {
-      const handleGlobalMouseMove = (e: MouseEvent) => {
-        const rect = itemRef.current!.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        
-        // Calculate angle from center to mouse
-        const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
-        const initialAngle = Math.atan2(initialMousePos.y - centerY, initialMousePos.x - centerX) * (180 / Math.PI);
-        
-        const newRotation = initialRotation + (angle - initialAngle);
-        onUpdate({ rotation: newRotation });
-      };
-      const handleGlobalMouseUp = () => setIsRotating(false);
-      
-      window.addEventListener('mousemove', handleGlobalMouseMove);
-      window.addEventListener('mouseup', handleGlobalMouseUp);
-      return () => {
-        window.removeEventListener('mousemove', handleGlobalMouseMove);
-        window.removeEventListener('mouseup', handleGlobalMouseUp);
-      };
-    }
-  }, [isRotating, initialRotation, initialMousePos, onUpdate]);
-
-  const isReceipt = item.id.startsWith('receipt-');
-
-  return (
-    <div
-      ref={itemRef}
-      className={`collage-item ${selected ? 'selected' : ''} ${item.type === 'paperclip' ? 'paperclip-item' : ''} ${item.type === 'smiley' ? 'smiley-item' : ''} ${isReceipt ? 'receipt-item' : ''}`}
-      style={{
-        left: `${item.x}px`,
-        top: `${item.y}px`,
-        transform: `rotate(${item.rotation}deg) scale(${item.scale})`,
-        cursor: isRotating ? 'grabbing' : isResizing ? 'nwse-resize' : isDragging ? 'grabbing' : isReceipt ? 'pointer' : 'grab'
-      }}
-      onMouseDown={handleMouseDown}
-    >
-      {isReceipt && item.receiptData && (
-        <div className="receipt-badge">
-          ${item.receiptData.total.toFixed(2)}
-        </div>
-      )}
-      <button 
-        className="delete-btn" 
-        onClick={(e) => { e.stopPropagation(); onDelete(); }}
-        title="Delete"
-      >
-        ×
-      </button>
-      <div 
-        className="rotate-handle"
-        onMouseDown={handleRotateStart}
-        title="Rotate"
-      >
-        ↻
       </div>
-      <div 
-        className="resize-handle"
-        onMouseDown={handleResizeStart}
-        title="Resize"
+
+      {/* Hidden File Inputs */}
+      <input
+        ref={receiptInputRef}
+        type="file"
+        multiple
+        accept="image/*"
+        onChange={handleReceiptUpload}
+        className="hidden"
       />
-      {item.type === 'sticker' && <span className="sticker-content">{item.content}</span>}
-      {item.type === 'image' && <img src={item.content} alt="collage item" draggable={false} />}
-      {item.type === 'smiley' && (
-        <span className="smiley-content" style={{ color: item.color }}>{item.content}</span>
-      )}
-      {item.type === 'paperclip' && (
-        <div className="paperclip-shape" style={{ borderColor: item.color }}>
-          <div className="paperclip-inner" style={{ borderColor: item.color }}></div>
+      <input
+        ref={photoInputRef}
+        type="file"
+        multiple
+        accept="image/*"
+        onChange={handlePhotoUpload}
+        className="hidden"
+      />
+
+      {/* Loading Indicator */}
+      {isAnalyzing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 rounded-lg">
+          <div className="bg-white rounded-lg p-8 text-center">
+            <div className="animate-spin text-4xl mb-4">⏳</div>
+            <p className="text-gray-800 font-semibold">Analyzing receipt...</p>
+          </div>
         </div>
       )}
     </div>
