@@ -40,6 +40,7 @@ export interface CollageItem {
 interface Store {
   memories: Memory[];
   collageItems: CollageItem[];
+  uploadedPhotos: CollageItem[];
   addMemory: (memory: Memory) => void;
   deleteMemory: (id: string) => void;
   updateMemory: (id: string, updates: Partial<Memory>) => void;
@@ -47,6 +48,8 @@ interface Store {
   updateCollageItem: (id: string, updates: Partial<CollageItem>) => void;
   deleteCollageItem: (id: string) => void;
   setCollageItems: (items: CollageItem[]) => void;
+  addUploadedPhoto: (photo: CollageItem) => void;
+  deleteUploadedPhoto: (id: string) => void;
   getTotalSpent: () => number;
 }
 
@@ -63,6 +66,7 @@ const INITIAL_DECORATIONS: CollageItem[] = [
 export const useStore = create<Store>((set, get) => ({
   memories: [],
   collageItems: INITIAL_DECORATIONS,
+  uploadedPhotos: [],
   addMemory: (memory) => set((state) => ({ 
     memories: [memory, ...state.memories] 
   })),
@@ -82,6 +86,12 @@ export const useStore = create<Store>((set, get) => ({
     collageItems: state.collageItems.filter(item => item.id !== id)
   })),
   setCollageItems: (items) => set({ collageItems: items }),
+  addUploadedPhoto: (photo) => set((state) => ({
+    uploadedPhotos: [...state.uploadedPhotos, photo]
+  })),
+  deleteUploadedPhoto: (id) => set((state) => ({
+    uploadedPhotos: state.uploadedPhotos.filter(photo => photo.id !== id)
+  })),
   getTotalSpent: () => {
     const items = get().collageItems;
     return items

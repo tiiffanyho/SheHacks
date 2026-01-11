@@ -30,7 +30,7 @@ export default function Home() {
   const receiptInputRef = useRef<HTMLInputElement>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
-  const { collageItems: items, addCollageItem, updateCollageItem, deleteCollageItem, getTotalSpent } = useStore();
+  const { collageItems: items, addCollageItem, updateCollageItem, deleteCollageItem, uploadedPhotos, addUploadedPhoto, deleteUploadedPhoto, getTotalSpent } = useStore();
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [selectedItemForEditing, setSelectedItemForEditing] = useState<CollageItem | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<CollageItem | null>(null);
@@ -50,7 +50,7 @@ export default function Home() {
   const lastYRef = useRef(0);
 
   // Count images and receipts
-  const imageCount = items.filter(i => i.type === 'image' && !i.id.startsWith('receipt-')).length;
+  const imageCount = uploadedPhotos.length;
   const receiptCount = items.filter(i => i.id.startsWith('receipt-')).length;
   const totalSpent = getTotalSpent();
 
@@ -115,7 +115,7 @@ export default function Home() {
             scale: 0.8,
             content: event.target?.result as string
           };
-          addCollageItem(newItem);
+          addUploadedPhoto(newItem);
         };
         reader.readAsDataURL(file);
       });
@@ -310,6 +310,7 @@ export default function Home() {
               // Deselect when clicking on canvas background (not on items)
               if (e.target === e.currentTarget && !isDrawMode && !isEraseMode && !isTextMode) {
                 setSelectedItem(null);
+                setSelectedItemForEditing(null);
               }
             }}
           >
@@ -386,25 +387,33 @@ export default function Home() {
           {photoSidebarOpen && (
             <div className="sidebar-content">
               <div className="sidebar-section">
-                {items.filter(i => i.type === 'image' && i.id.startsWith('photo-')).length === 0 ? (
+                {uploadedPhotos.length === 0 ? (
                   <div className="empty-message">No photos uploaded yet</div>
                 ) : (
                   <div className="photos-grid">
-                    {items.filter(i => i.type === 'image' && i.id.startsWith('photo-')).map((item) => (
+                    {uploadedPhotos.map((item) => (
                       <div key={item.id} className="photo-thumbnail">
                         <img src={item.content} alt="Uploaded" />
                         <button 
                           className="add-photo-btn"
-                          onClick={() => {
-                            addCollageItem({
-                              id: `photo-copy-${Date.now()}`,
-                              type: 'image',
-                              x: 150 + Math.random() * 200,
-                              y: 120 + Math.random() * 150,
-                              rotation: Math.random() * 10 - 5,
-                              scale: 0.8,
-                              content: item.content
-                            });
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const canvas = document.querySelector('.canvas');
+                            if (canvas) {
+                              const canvasRect = canvas.getBoundingClientRect();
+                              const centerX = canvasRect.width / 2 - 540;
+                              const centerY = canvasRect.height / 2 - 790;
+                              addCollageItem({
+                                id: `photo-copy-${Date.now()}`,
+                                type: 'image',
+                                x: centerX,
+                                y: centerY,
+                                rotation: 0,
+                                scale: 0.3,
+                                content: item.content
+                              });
+                            }
                           }}
                           title="Add to canvas"
                         >
@@ -508,46 +517,6 @@ export default function Home() {
               </div>
             </div>
           )}
-
-          {isTextMode && (
-            <div className="draw-options">
-              <div className="draw-option-group">
-                <label>Font</label>
-                <select 
-                  value={selectedTextFont}
-                  onChange={(e) => setSelectedTextFont(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    border: '2px solid #e0e0e0',
-                    borderRadius: '6px',
-                    fontSize: '0.9rem',
-                    fontFamily: e.target.value,
-                    cursor: 'pointer'
-                  }}
-                >
-                  <option value="Arial">Arial</option>
-                  <option value="Georgia">Georgia</option>
-                  <option value="Times New Roman">Times New Roman</option>
-                  <option value="Courier New">Courier New</option>
-                  <option value="Verdana">Verdana</option>
-                  <option value="Comic Sans MS">Comic Sans MS</option>
-                  <option value="Impact">Impact</option>
-                </select>
-              </div>
-
-              <div className="draw-option-group">
-                <label>Color</label>
-                <input 
-                  type="color" 
-                  value={selectedTextColor} 
-                  onChange={(e) => setSelectedTextColor(e.target.value)}
-                  style={{ width: '100%', height: '40px', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-                  title="Pick a text color"
-                />
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Text Editing Panel */}
@@ -556,16 +525,16 @@ export default function Home() {
             position: 'fixed',
             right: 20,
             bottom: 20,
-            width: '200px',
+            width: '160px',
             background: 'white',
             border: '2px solid #FEDBDD',
             borderRadius: '12px',
-            padding: '1rem',
+            padding: '0.75rem',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
             zIndex: 50
           }}>
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', fontWeight: 600, color: '#333', marginBottom: '0.5rem', fontSize: '0.85rem' }}>Font</label>
+            <div style={{ marginBottom: '0.75rem' }}>
+              <label style={{ display: 'block', fontWeight: 600, color: '#333', marginBottom: '0.3rem', fontSize: '0.75rem' }}>Font</label>
               <select 
                 value={selectedItemForEditing.fontFamily || 'Arial'}
                 onChange={(e) => {
@@ -574,10 +543,10 @@ export default function Home() {
                 }}
                 style={{
                   width: '100%',
-                  padding: '0.5rem',
+                  padding: '0.4rem',
                   border: '2px solid #e0e0e0',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem',
+                  borderRadius: '4px',
+                  fontSize: '0.8rem',
                   fontFamily: selectedItemForEditing.fontFamily || 'Arial',
                   cursor: 'pointer'
                 }}
@@ -593,7 +562,7 @@ export default function Home() {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontWeight: 600, color: '#333', marginBottom: '0.5rem', fontSize: '0.85rem' }}>Color</label>
+              <label style={{ display: 'block', fontWeight: 600, color: '#333', marginBottom: '0.3rem', fontSize: '0.75rem' }}>Color</label>
               <input 
                 type="color" 
                 value={selectedItemForEditing.color || '#000000'} 
@@ -601,7 +570,7 @@ export default function Home() {
                   updateItem(selectedItemForEditing.id, { color: e.target.value });
                   setSelectedItemForEditing({ ...selectedItemForEditing, color: e.target.value });
                 }}
-                style={{ width: '100%', height: '40px', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                style={{ width: '100%', height: '30px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                 title="Pick a text color"
               />
             </div>
@@ -703,11 +672,15 @@ function CollageItemComponent({ item, selected, onSelect, onUpdate, onDelete, on
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (isResizing || isRotating) return;
+    // Allow drag from move handle, images, or the item itself
+    const target = e.target as HTMLElement;
+    if (target.classList.contains('delete-btn') || target.classList.contains('resize-handle') || target.classList.contains('rotate-handle')) return;
     e.preventDefault();
     onSelect();
     clickStartTime.current = Date.now();
     setIsDragging(true);
-    const rect = (e.target as HTMLElement).getBoundingClientRect();
+    const rect = itemRef.current?.getBoundingClientRect();
+    if (!rect) return;
     setDragOffset({
       x: e.clientX - rect.left,
       y: e.clientY - rect.top
@@ -829,6 +802,34 @@ function CollageItemComponent({ item, selected, onSelect, onUpdate, onDelete, on
           ${item.receiptData.total.toFixed(2)}
         </div>
       )}
+      <div 
+        className="move-handle"
+        onMouseDown={handleMouseDown}
+        title="Drag to move"
+        style={{
+          position: 'absolute',
+          top: '-24px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '20px',
+          height: '20px',
+          background: '#667eea',
+          border: '2px solid white',
+          borderRadius: '50%',
+          cursor: 'grab',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '12px',
+          color: 'white',
+          fontWeight: 'bold',
+          zIndex: 10,
+          opacity: selected ? 1 : 0,
+          transition: 'opacity 0.2s'
+        }}
+      >
+        ↔
+      </div>
       <button 
         className="delete-btn" 
         onClick={(e) => { e.stopPropagation(); onDelete(); }}
