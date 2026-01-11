@@ -48,6 +48,7 @@ export default function Home() {
   const isDrawingRef = useRef(false);
   const lastXRef = useRef(0);
   const lastYRef = useRef(0);
+  const drawingCtxRef = useRef<CanvasRenderingContext2D | null>(null);
 
   // Count images and receipts
   const imageCount = uploadedPhotos.length;
@@ -106,16 +107,24 @@ export default function Home() {
       Array.from(files).forEach(file => {
         const reader = new FileReader();
         reader.onload = (event) => {
+          const imageData = event.target?.result as string;
           const newItem: CollageItem = {
             id: `photo-${Date.now()}-${Math.random()}`,
             type: 'image',
             x: 150 + Math.random() * 200,
             y: 120 + Math.random() * 150,
             rotation: Math.random() * 10 - 5,
-            scale: 0.8,
-            content: event.target?.result as string
+            scale: 0.25,
+            content: imageData
           };
+          // Add to sidebar photos
           addUploadedPhoto(newItem);
+          // Also add directly to canvas with standard size
+          addCollageItem({
+            ...newItem,
+            id: `photo-canvas-${Date.now()}-${Math.random()}`,
+            scale: 0.25
+          });
         };
         reader.readAsDataURL(file);
       });
@@ -157,48 +166,64 @@ export default function Home() {
   };
 
   const startDrawing = (e: React.MouseEvent<HTMLDivElement>) => {
-    if ((!isDrawMode && !isEraseMode) || !canvasRef.current) return;
+    if ((!isDrawMode && !isEraseMode) || !canvasDrawRef.current) return;
     
-    const rect = canvasRef.current.getBoundingClientRect();
+    const canvas = canvasDrawRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    drawingCtxRef.current = ctx;
+    
+    const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
     isDrawingRef.current = true;
     lastXRef.current = x;
     lastYRef.current = y;
+    
+    // Start a new path for this stroke
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = isEraseMode ? 30 : 5;
+    
+    if (isEraseMode) {
+      ctx.globalCompositeOperation = 'destination-out';
+    } else {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = drawColor;
+    }
   };
 
   const draw = (e: React.MouseEvent<HTMLDivElement>) => {
-    if ((!isDrawMode && !isEraseMode) || !isDrawingRef.current || !canvasRef.current) return;
+    if ((!isDrawMode && !isEraseMode) || !isDrawingRef.current || !drawingCtxRef.current) return;
     
-    const rect = canvasRef.current.getBoundingClientRect();
+    const canvas = canvasDrawRef.current;
+    if (!canvas) return;
+    
+    const ctx = drawingCtxRef.current;
+    const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    // Create a single line segment from last point to current point
-    const newItem: CollageItem = {
-      id: `line-${Date.now()}-${Math.random()}`,
-      type: 'line',
-      x: Math.min(lastXRef.current, x),
-      y: Math.min(lastYRef.current, y),
-      rotation: 0,
-      scale: 1,
-      content: JSON.stringify({ 
-        x1: 0, 
-        y1: 0, 
-        x2: x - lastXRef.current, 
-        y2: y - lastYRef.current 
-      }),
-      color: isEraseMode ? '#FFFFFF' : drawColor,
-      lineWidth: isEraseMode ? 20 : 3
-    };
-    addCollageItem(newItem);
+    // Draw line from last point to current point
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    
+    // Continue the path from current point
+    ctx.beginPath();
+    ctx.moveTo(x, y);
     
     lastXRef.current = x;
     lastYRef.current = y;
   };
 
   const stopDrawing = () => {
+    if (drawingCtxRef.current) {
+      drawingCtxRef.current.globalCompositeOperation = 'source-over';
+    }
     isDrawingRef.current = false;
   };
 
@@ -301,11 +326,7 @@ export default function Home() {
           <div 
             ref={canvasRef} 
             className="canvas"
-            style={{ cursor: isDrawMode || isEraseMode ? 'crosshair' : 'default' }}
-            onMouseDown={startDrawing}
-            onMouseMove={draw}
-            onMouseUp={stopDrawing}
-            onMouseLeave={stopDrawing}
+            style={{ cursor: isDrawMode || isEraseMode ? 'crosshair' : 'default', position: 'relative' }}
             onClick={(e) => {
               // Deselect when clicking on canvas background (not on items)
               if (e.target === e.currentTarget && !isDrawMode && !isEraseMode && !isTextMode) {
@@ -314,7 +335,27 @@ export default function Home() {
               }
             }}
           >
-            {items.filter(i => !['paperclip', 'smiley'].includes(i.type)).length === 0 && (
+            {/* Drawing Canvas Overlay */}
+            <canvas
+              ref={canvasDrawRef}
+              width={1200}
+              height={800}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                pointerEvents: isDrawMode || isEraseMode ? 'auto' : 'none',
+                zIndex: isDrawMode || isEraseMode ? 100 : 1,
+                cursor: isDrawMode || isEraseMode ? 'crosshair' : 'default'
+              }}
+              onMouseDown={startDrawing}
+              onMouseMove={draw}
+              onMouseUp={stopDrawing}
+              onMouseLeave={stopDrawing}
+            />
+            {items.filter(i => !['paperclip', 'smiley', 'line'].includes(i.type)).length === 0 && (
               <div className="empty-state">
                 <div className="empty-icon">✦</div>
                 <h2>Your Canvas is Empty</h2>
@@ -322,7 +363,7 @@ export default function Home() {
               </div>
             )}
             
-            {items.map((item) => (
+            {items.filter(item => item.type !== 'line').map((item) => (
               <CollageItemComponent
                 key={item.id}
                 item={item}
@@ -504,11 +545,13 @@ export default function Home() {
                 <button 
                   className="clear-btn"
                   onClick={() => {
-                    items.forEach(item => {
-                      if (item.type === 'line') {
-                        deleteItem(item.id);
+                    const canvas = canvasDrawRef.current;
+                    if (canvas) {
+                      const ctx = canvas.getContext('2d');
+                      if (ctx) {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
                       }
-                    });
+                    }
                   }}
                   title="Clear all drawings"
                 >

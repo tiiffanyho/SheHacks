@@ -763,7 +763,7 @@
 /* Text and Draw Items */
 .text-item {
   padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.9);
+  background: transparent;
   border-radius: 4px;
   white-space: normal;
   word-break: break-word;
